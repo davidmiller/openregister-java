@@ -26,6 +26,8 @@ public abstract class EntryStore implements GetHandle {
         this.itemDAO = handle.attach(ItemDAO.class);
         this.destinationDBUpdateDAO = handle.attach(DestinationDBUpdateDAO.class);
         this.entryDAO.ensureSchema();
+        this.entryDAO.ensureCurrentEntryNumberTable();
+        this.entryDAO.ensureCurrentEntryNumberInit();
         this.itemDAO.ensureSchema();
     }
 
