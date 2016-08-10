@@ -45,7 +45,7 @@ public class DataUpload {
     public void load(String payload) {
         try {
             Iterable<JsonNode> objects = objectReconstructor.reconstruct(payload.split("\n"));
-            objects.forEach(singleObject -> itemValidator.validateItem(registerPrimaryKey, singleObject));
+            objects.forEach(singleObject -> itemValidator.validateItem(singleObject));
             entryStore.load(registerPrimaryKey, objects);
         } catch (Throwable t) {
             logger.error(Throwables.getStackTraceAsString(t));

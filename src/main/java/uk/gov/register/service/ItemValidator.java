@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.register.configuration.FieldsConfiguration;
-import uk.gov.register.core.Register;
-import uk.gov.register.configuration.RegistersConfiguration;
+import uk.gov.register.configuration.RegisterDataConfiguration;
 import uk.gov.register.core.Cardinality;
 import uk.gov.register.core.Field;
+import uk.gov.register.core.Register;
 import uk.gov.register.core.datatype.Datatype;
 import uk.gov.register.exceptions.ItemValidationException;
 
@@ -17,16 +17,16 @@ import java.util.Set;
 public class ItemValidator {
 
     private final FieldsConfiguration fieldsConfiguration;
-    private final RegistersConfiguration registersConfiguration;
+    private final RegisterDataConfiguration registerDataConfiguration;
 
     @Inject
-    public ItemValidator(RegistersConfiguration registersConfiguration, FieldsConfiguration fieldsConfiguration) {
+    public ItemValidator(RegisterDataConfiguration registerDataConfiguration, FieldsConfiguration fieldsConfiguration) {
+        this.registerDataConfiguration = registerDataConfiguration;
         this.fieldsConfiguration = fieldsConfiguration;
-        this.registersConfiguration = registersConfiguration;
     }
 
-    public void validateItem(String registerName, JsonNode inputEntry) throws ItemValidationException {
-        Register register = registersConfiguration.getRegisterData(registerName).getRegister();
+    public void validateItem(JsonNode inputEntry) throws ItemValidationException {
+        Register register = registerDataConfiguration.getRegisterData().getRegister();
 
         validateFields(inputEntry, register);
 

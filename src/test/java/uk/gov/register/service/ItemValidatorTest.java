@@ -2,13 +2,16 @@ package uk.gov.register.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import org.junit.Before;
 import org.junit.Test;
 import uk.gov.register.configuration.FieldsConfiguration;
-import uk.gov.register.configuration.RegistersConfiguration;
+import uk.gov.register.core.RegisterData;
 import uk.gov.register.exceptions.ItemValidationException;
-import uk.gov.register.service.ItemValidator;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -16,19 +19,27 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 public class ItemValidatorTest {
+    public static final Map REGISTER_CONFIG = ImmutableMap.of(
+            "fields", ImmutableList.of("register", "text", "fields"),
+            "register", "register");
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private FieldsConfiguration fieldsConfiguration = new FieldsConfiguration(Optional.empty());
-    private RegistersConfiguration registerConfiguration = new RegistersConfiguration(Optional.empty());
 
-    private ItemValidator itemValidator = new ItemValidator(registerConfiguration, fieldsConfiguration);
+    private ItemValidator itemValidator;
+
+    @Before
+    public void setUp() throws IOException {
+        final RegisterData registerData = objectMapper.convertValue(REGISTER_CONFIG, RegisterData.class);
+        itemValidator = new ItemValidator(() -> registerData, fieldsConfiguration);
+    }
 
     @Test
     public void validateItem_throwsValidationException_givenPrimaryKeyOfRegisterNotExists() throws IOException {
         String jsonString = "{\"text\":\"bar\"}";
         JsonNode jsonNode = nodeOf(jsonString);
         try {
-            itemValidator.validateItem("register", jsonNode);
+            itemValidator.validateItem(jsonNode);
             fail("Must not execute this statement");
         } catch (ItemValidationException e) {
             assertThat(e.getMessage(), equalTo("Entry does not contain primary key field 'register'"));
@@ -41,7 +52,7 @@ public class ItemValidatorTest {
         String jsonString = "{\"register\":\"  \",\"text\":\"bar\"}";
         JsonNode jsonNode = nodeOf(jsonString);
         try {
-            itemValidator.validateItem("register", jsonNode);
+            itemValidator.validateItem(jsonNode);
             fail("Must not execute this statement");
         } catch (ItemValidationException e) {
             assertThat(e.getMessage(), equalTo("Primary key field 'register' must have a valid value"));
@@ -54,7 +65,7 @@ public class ItemValidatorTest {
         String jsonString = "{\"register\":\"aregister\",\"text\":5}";
         JsonNode jsonNode = nodeOf(jsonString);
         try {
-            itemValidator.validateItem("register", jsonNode);
+            itemValidator.validateItem(jsonNode);
             fail("Must not execute this statement");
         } catch (ItemValidationException e) {
             assertThat(e.getMessage(), equalTo("Field 'text' value must be of type 'text'"));
@@ -67,7 +78,7 @@ public class ItemValidatorTest {
         String jsonString = "{\"register\":\"aregister\",\"text\":5,\"key1\":\"value\",\"key2\":\"value\"}";
         JsonNode jsonNode = nodeOf(jsonString);
         try {
-            itemValidator.validateItem("register", jsonNode);
+            itemValidator.validateItem(jsonNode);
             fail("Must not execute this statement");
         } catch (ItemValidationException e) {
             assertThat(e.getMessage(), equalTo("Entry contains invalid fields: [key1, key2]"));
@@ -80,7 +91,7 @@ public class ItemValidatorTest {
         String jsonString = "{\"register\":\"aregister\",\"fields\":\"nonAcceptableNonArrayFieldValue\"}";
         JsonNode jsonNode = nodeOf(jsonString);
         try {
-            itemValidator.validateItem("register", jsonNode);
+            itemValidator.validateItem(jsonNode);
             fail("Must not execute this statement");
         } catch (ItemValidationException e) {
             assertThat(e.getMessage(), equalTo("Field 'fields' has cardinality 'n' so the value must be an array of 'string'"));
@@ -93,7 +104,7 @@ public class ItemValidatorTest {
         String jsonString = "{\"register\":\"aregister\",\"fields\":[\"foo\",5]}";
         JsonNode jsonNode = nodeOf(jsonString);
         try {
-            itemValidator.validateItem("register", jsonNode);
+            itemValidator.validateItem(jsonNode);
             fail("Must not execute this statement");
         } catch (ItemValidationException e) {
             assertThat(e.getMessage(), equalTo("Field 'fields' values must be of type 'string'"));
@@ -104,7 +115,7 @@ public class ItemValidatorTest {
     @Test
     public void noErrorWhenEntryIsValid() throws IOException, ItemValidationException {
         String jsonString = "{\"register\":\"aregister\",\"text\":\"some text\"}";
-        itemValidator.validateItem("register", nodeOf(jsonString));
+        itemValidator.validateItem(nodeOf(jsonString));
     }
 
     private JsonNode nodeOf(String jsonString) throws IOException {
@@ -116,7 +127,7 @@ public class ItemValidatorTest {
         String jsonString = "{\"register\":\"aregister\",\"fields\":[\"foo\",\"\"]}";
         JsonNode jsonNode = nodeOf(jsonString);
         try {
-            itemValidator.validateItem("register", jsonNode);
+            itemValidator.validateItem(jsonNode);
             fail("Must not execute this statement");
         } catch (ItemValidationException e) {
             assertThat(e.getMessage(), equalTo("Field 'fields' values must be of type 'string'"));

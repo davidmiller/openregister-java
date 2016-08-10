@@ -10,7 +10,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 import org.thymeleaf.resourceresolver.FileResourceResolver;
 import org.thymeleaf.templateresolver.TemplateResolver;
-import uk.gov.register.configuration.RegistersConfiguration;
+import uk.gov.register.configuration.RegisterDataConfiguration;
 import uk.gov.register.core.RegisterData;
 import uk.gov.register.thymeleaf.ThymeleafResourceResolver;
 import uk.gov.register.util.RegisterNameExtractor;
@@ -54,9 +54,9 @@ public class AssetsBundleCustomErrorHandler extends ErrorHandler {
 
         ServletContext sc = baseRequest.getContext();
         ServiceLocator sl = ((ServletContainer) environment.getJerseyServletContainer()).getApplicationHandler().getServiceLocator();
-        RegistersConfiguration rc = sl.getService(RegistersConfiguration.class);
+        RegisterDataConfiguration rc = sl.getService(RegisterDataConfiguration.class);
         String registerId = RegisterNameExtractor.extractRegisterName(request.getHeader("Host"));
-        RegisterData rd = rc.getRegisterData(registerId);
+        RegisterData rd = rc.getRegisterData();
         String registerName = registerId.replace('-', ' ');
 
         WebContext wc = new WebContext(request, response, sc,

@@ -1,0 +1,47 @@
+server:
+  registerDefaultExceptionMappers: false
+  applicationConnectors:
+    - type: http
+      port: 9000
+  adminConnectors:
+    - type: http
+      port: 9001
+
+register:
+  entry-number: "13"
+  item-hash: "sha-256:bbd8c04498299f15c177783291e531793774f4ec6ba9455b5a0b4920e35cb643"
+  entry-timestamp: "2016-04-21T10:14:21Z"
+  text: "Postal codes which may appear in a UK address"
+  phase: "alpha"
+  fields:
+  - "postcode"
+  - "point"
+  register: "postcode"
+  registry: "office-for-national-statistics"
+  copyright: "Contains National Statistics data © [Crown copyright and database right\
+    \ 2013](http://www.nationalarchives.gov.uk/doc/open-government-licence/),\n Contains\
+    \ Ordnance Survey data © [Crown copyright and database right 2013](http://www.ordnancesurvey.co.uk/oswebsite/docs/licences/os-opendata-licence.pdf),\n\
+    \ Contains Royal Mail data © [Royal Mail copyright and database right 2013](http://www.dfpni.gov.uk/lps/index/copyright_licensing_publishing.htm)"
+
+registerDomain: test.register.gov.uk
+
+credentials:
+  user: foo
+  password: bar
+
+database:
+  driverClass: org.postgresql.Driver
+  url: PLACEHOLDER
+  user: postgres
+  properties:
+    charSet: UTF-8
+
+  #db connection properties
+  initialSize: 1
+  minSize: 1
+  maxSize: 3
+
+  properties:
+    charSet: UTF-8
+
+enableDownloadResource: true

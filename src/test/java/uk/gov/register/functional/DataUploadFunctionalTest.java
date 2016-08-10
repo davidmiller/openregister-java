@@ -39,10 +39,9 @@ public class DataUploadFunctionalTest {
     public static final int APPLICATION_PORT = 9000;
 
     private final DropwizardAppRule<RegisterConfiguration> appRule = new DropwizardAppRule<>(RegisterApplication.class,
-            ResourceHelpers.resourceFilePath("test-app-config.yaml"),
+            ResourceHelpers.resourceFilePath("test-app-register-config.yaml"),
             ConfigOverride.config("database.url", postgresConnectionString),
-            ConfigOverride.config("jerseyClient.timeout", "3000ms"),
-            ConfigOverride.config("register", "register"));
+            ConfigOverride.config("jerseyClient.timeout", "3000ms"));
 
     @Rule
     public TestRule ruleChain = RuleChain.

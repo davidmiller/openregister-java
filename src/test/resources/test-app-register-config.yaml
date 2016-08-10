@@ -2,31 +2,26 @@ server:
   registerDefaultExceptionMappers: false
   applicationConnectors:
     - type: http
-      port: 9090
+      port: 9000
   adminConnectors:
     - type: http
-      port: 9091
+      port: 9001
 
 register:
-  entry-number: "18"
-  item-hash: "sha-256:1e7aa55e22668057e21c4de7f7c897c50a244af814a5b682757316631b63b771"
+  entry-number: "16"
+  item-hash: "sha-256:a90a6cb96e09cb4a1136889d18c4f9bb0f0a8a80de87d0f947c2618c8724e067"
   entry-timestamp: "2016-04-21T10:14:21Z"
-  text: "Primary, secondary and special needs schools in England and Wales"
+  text: "Registers maintained by HM Government"
   phase: "alpha"
   fields:
-  - "school"
-  - "name"
-  - "start-date"
-  - "end-date"
-  - "gender"
-  - "religious-character"
-  - "minimum-age"
-  - "maximum-age"
-  - "headteacher"
-  - "website"
-  - "address"
-  register: "school"
-  registry: "department-for-education"
+  - "register"
+  - "text"
+  - "registry"
+  - "phase"
+  - "copyright"
+  - "fields"
+  register: "register"
+  registry: "cabinet-office"
 
 registerDomain: test.register.gov.uk
 
@@ -36,7 +31,7 @@ credentials:
 
 database:
   driverClass: org.postgresql.Driver
-  url: jdbc:postgresql://localhost:5432/ft_openregister_java
+  url: PLACEHOLDER
   user: postgres
   properties:
     charSet: UTF-8

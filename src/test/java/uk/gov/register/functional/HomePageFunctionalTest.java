@@ -11,9 +11,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
-import uk.gov.register.functional.app.CleanDatabaseRule;
 import uk.gov.register.RegisterApplication;
 import uk.gov.register.RegisterConfiguration;
+import uk.gov.register.functional.app.CleanDatabaseRule;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Response;
@@ -25,13 +25,10 @@ import static uk.gov.register.functional.db.TestDBSupport.postgresConnectionStri
 
 public class HomePageFunctionalTest  {
 
-    private final String registerName = "postcode";
-
     private final DropwizardAppRule<RegisterConfiguration> appRule = new DropwizardAppRule<>(RegisterApplication.class,
-            ResourceHelpers.resourceFilePath("test-app-config.yaml"),
+            ResourceHelpers.resourceFilePath("test-app-postcode-config.yaml"),
             ConfigOverride.config("database.url", postgresConnectionString),
-            ConfigOverride.config("jerseyClient.timeout", "3000ms"),
-            ConfigOverride.config("register", registerName));
+            ConfigOverride.config("jerseyClient.timeout", "3000ms"));
 
     @Rule
     public TestRule ruleChain = RuleChain.

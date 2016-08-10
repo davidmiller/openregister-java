@@ -1,44 +1,24 @@
 package uk.gov.register.functional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
-import io.dropwizard.jackson.Jackson;
 import org.junit.Test;
 import uk.gov.register.functional.db.TestEntry;
-import uk.gov.register.util.ResourceYamlFileReader;
 
 import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.core.IsNot.not;
-import static uk.gov.register.functional.db.TestEntry.anEntry;
 
 
 public class RegisterResourceFunctionalTest extends FunctionalTestBase {
 
     private final Map<?,?> expectedAddressRegisterMap = getAddressRegisterMap();
-
-    @Test
-    public void registerJsonShouldContainEntryViewAddressRegister() throws Throwable {
-        populateRegisterRegisterEntries();
-        Response addressRecordInRegisterRegisterResponse = getRequest("register", "/record/address.json");
-        assertThat(addressRecordInRegisterRegisterResponse.getStatus(), equalTo(200));
-        Map<?,?> addressRecordMapInRegisterRegister = addressRecordInRegisterRegisterResponse.readEntity(Map.class);
-        verifyStringIsAnISODate(addressRecordMapInRegisterRegister.get("entry-timestamp").toString());
-
-        assertAddressRegisterMapIsEqualTo(addressRecordMapInRegisterRegister);
-    }
 
     @Test
     public void registerJsonShouldContainEntryViewRegisterRegister() throws Throwable {
@@ -82,35 +62,9 @@ public class RegisterResourceFunctionalTest extends FunctionalTestBase {
         ));
     }
 
-    private void populateRegisterRegisterEntries() throws IOException {
-        Collection<Map> registers = new ResourceYamlFileReader().readResource(
-                Optional.empty(),
-                "config/registers.yaml",
-                new TypeReference<Map<String, Map>>() {
-                }
-        );
-
-        List<TestEntry> registerEntries = registers.stream().map(r -> {
-            int entryNumber = Integer.parseInt(r.remove("entry-number").toString());
-            String timestampISO = (String) r.remove("entry-timestamp");
-            r.remove("item-hash");
-            return TestEntry.anEntry(entryNumber, writeToString(r), Instant.parse(timestampISO));
-        }).collect(Collectors.toList());
-
-        dbSupport.publishEntries("register", registerEntries);
-    }
-
     private void assertAddressRegisterMapIsEqualTo(Map<?, ?> sutAddressRecordMapInRegisterRegister) {
         for (Map.Entry entry : expectedAddressRegisterMap.entrySet()) {
             assertThat(sutAddressRecordMapInRegisterRegister, hasEntry(entry.getKey(), entry.getValue()));
-        }
-    }
-
-    private String writeToString(Map map) {
-        try {
-            return Jackson.newObjectMapper().writeValueAsString(map);
-        } catch (JsonProcessingException e) {
-            throw Throwables.propagate(e);
         }
     }
 

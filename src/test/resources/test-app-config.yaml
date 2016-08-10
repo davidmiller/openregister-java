@@ -7,7 +7,28 @@ server:
     - type: http
       port: 9001
 
-register: address
+register:
+  entry-number: "1"
+  item-hash: "sha-256:6a7bcb516b4a465f3340a31ab42a35a9193e512608d9577388da4d99251880a8"
+  entry-timestamp: "2016-04-21T10:14:21Z"
+  text: "Postal addresses in the UK"
+  phase: "alpha"
+  fields:
+  - "address"
+  - "property"
+  - "street"
+  - "locality"
+  - "town"
+  - "area"
+  - "postcode"
+  - "country"
+  - "latitude"
+  - "longitude"
+  register: "address"
+  registry: "office-for-national-statistics"
+  copyright: "Contains Ordnance Survey data © Crown copyright & database right 2015\n\
+    \ Contains Royal Mail data © Royal Mail copyright & database right 2015\n"
+
 registerDomain: test.register.gov.uk
 
 credentials:

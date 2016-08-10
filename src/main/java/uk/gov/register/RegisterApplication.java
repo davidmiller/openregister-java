@@ -23,7 +23,6 @@ import org.skife.jdbi.v2.DBI;
 import uk.gov.organisation.client.GovukOrganisationClient;
 import uk.gov.register.configuration.FieldsConfiguration;
 import uk.gov.register.configuration.PublicBodiesConfiguration;
-import uk.gov.register.configuration.RegistersConfiguration;
 import uk.gov.register.core.RegisterData;
 import uk.gov.register.core.User;
 import uk.gov.register.db.EntryQueryDAO;
@@ -84,9 +83,8 @@ public class RegisterApplication extends Application<RegisterConfiguration> {
         EntryQueryDAO entryDAO = jdbi.onDemand(EntryQueryDAO.class);
         RecordQueryDAO recordDAO = jdbi.onDemand(RecordQueryDAO.class);
 
-        RegistersConfiguration registersConfiguration = new RegistersConfiguration(Optional.ofNullable(System.getProperty("registersYaml")));
         FieldsConfiguration mintFieldsConfiguration = new FieldsConfiguration(Optional.ofNullable(System.getProperty("fieldsYaml")));
-        RegisterData registerData = registersConfiguration.getRegisterData(configuration.getRegister());
+        RegisterData registerData = configuration.getRegisterData();
 
         JerseyEnvironment jersey = environment.jersey();
         DropwizardResourceConfig resourceConfig = jersey.getResourceConfig();
@@ -102,7 +100,6 @@ public class RegisterApplication extends Application<RegisterConfiguration> {
                 bind(entryDAO).to(EntryQueryDAO.class);
                 bind(recordDAO).to(RecordQueryDAO.class);
                 bind(mintFieldsConfiguration).to(FieldsConfiguration.class);
-                bind(registersConfiguration).to(RegistersConfiguration.class);
                 bind(registerData).to(RegisterData.class);
                 bind(new PublicBodiesConfiguration(Optional.ofNullable(System.getProperty("publicBodiesYaml")))).to(PublicBodiesConfiguration.class);
 

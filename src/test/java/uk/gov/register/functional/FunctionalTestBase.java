@@ -9,10 +9,10 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
-import uk.gov.register.functional.app.WipeDatabaseRule;
 import uk.gov.register.RegisterApplication;
 import uk.gov.register.RegisterConfiguration;
 import uk.gov.register.functional.app.RegisterApplicationRunner;
+import uk.gov.register.functional.app.WipeDatabaseRule;
 import uk.gov.register.functional.db.DBSupport;
 import uk.gov.register.functional.db.TestDAO;
 
@@ -64,8 +64,8 @@ public class FunctionalTestBase {
     }
 
     Response getRequest(String registerName, String path) {
-        String hostHeader = registerName + ".beta.openregister.org";
-        return client.target(String.format("http://%s:%d%s", hostHeader, app.getLocalPort(), path)).request().get();
+        String host = registerName + ".beta.openregister.org";
+        return client.target(String.format("http://%s:%d%s", host, app.getLocalPort(), path)).request().get();
     }
 
     protected void mintItems(String... items) {

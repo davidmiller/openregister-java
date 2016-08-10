@@ -6,9 +6,11 @@ import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.db.DataSourceFactory;
 import uk.gov.organisation.client.GovukClientConfiguration;
 import uk.gov.register.auth.RegisterAuthenticatorFactory;
+import uk.gov.register.configuration.RegisterDataConfiguration;
 import uk.gov.register.configuration.RegisterDomainConfiguration;
 import uk.gov.register.configuration.RegisterNameConfiguration;
 import uk.gov.register.configuration.ResourceConfiguration;
+import uk.gov.register.core.RegisterData;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -16,7 +18,7 @@ import java.net.URI;
 import java.util.Optional;
 
 public class RegisterConfiguration extends Configuration
-        implements RegisterNameConfiguration, RegisterDomainConfiguration, ResourceConfiguration, GovukClientConfiguration {
+        implements RegisterNameConfiguration, RegisterDomainConfiguration, ResourceConfiguration, GovukClientConfiguration, RegisterDataConfiguration {
     @Valid
     @NotNull
     @JsonProperty
@@ -41,7 +43,7 @@ public class RegisterConfiguration extends Configuration
     @Valid
     @NotNull
     @JsonProperty
-    private String register;
+    private RegisterData register;
 
     @SuppressWarnings("unused")
     @Valid
@@ -62,6 +64,11 @@ public class RegisterConfiguration extends Configuration
     }
 
     public String getRegister() {
+        return register.getRegister().getRegisterName();
+    }
+
+    @Override
+    public RegisterData getRegisterData() {
         return register;
     }
 
