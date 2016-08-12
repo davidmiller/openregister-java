@@ -202,10 +202,14 @@ task createDeployableBundle(type: Zip) {
     destinationDir file('deployable_bundle') // directory that you want your archive to be placed in
 }
 
+String getConfigFile(){
+    return System.getenv('OPENREGISTER_CONFIG') ?: "config.yaml"
+}
+
 task(run, type: JavaExec, dependsOn: ['classes']) {
     main = 'uk.gov.register.RegisterApplication'
     classpath = sourceSets.main.runtimeClasspath
-    args = ["server", "config.yaml"]
+    args = ["server", getConfigFile()]
     jvmArgs = ["-DbaseDirForTemplates=$projectDir/src/main/resources"]
 }
 

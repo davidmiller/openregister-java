@@ -1,0 +1,26 @@
+database:
+  driverClass: org.postgresql.Driver
+  url: jdbc:postgresql://192.168.99.100:5432/openregister_java
+  user: openregister
+  password: openregister
+
+  #db connection properties
+  initialSize: 1
+  minSize: 1
+  maxSize: 4
+
+  properties:
+    charSet: UTF-8
+
+
+server:
+  registerDefaultExceptionMappers: false
+  adminConnectors:
+    - type: http
+      port: 9092
+
+registerDomain: openregister.dev:8080
+
+register: school
+
+enableDownloadResource: true

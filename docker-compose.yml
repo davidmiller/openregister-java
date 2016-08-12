@@ -1,0 +1,23 @@
+web:
+  restart: always
+  build: .
+  ports:
+    - "8080:8080"
+    - "5005:5005"
+  links:
+    - postgres
+  volumes:
+    - .:/openregister
+  environment:
+    OPENREGISTER_CONFIG: "config-docker.yaml"
+    JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+
+postgres:
+  image: postgres:latest
+  ports:
+    - "5432:5432"
+  environment:
+    POSTGRES_DB: openregister_java
+    POSTGRES_USER: openregister
+    POSTGRES_PASSWORD: openregister
+
