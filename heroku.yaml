@@ -14,12 +14,10 @@ database:
 
 server:
   registerDefaultExceptionMappers: false
-  connectors:
+  applicationConnectors:
     - type: http
       port: ${PORT}
-  adminConnectors:
-    - type: http
-      port: ${PORT}
+  adminConnectors: []
 
 registerDomain: ${APP_DOMAIN}
 
