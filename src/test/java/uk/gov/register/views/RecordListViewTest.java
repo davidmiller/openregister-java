@@ -12,6 +12,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
 import uk.gov.register.configuration.FieldsConfiguration;
 import uk.gov.register.core.Entry;
+import uk.gov.register.core.Field;
 import uk.gov.register.core.Item;
 import uk.gov.register.core.Record;
 import uk.gov.register.core.RegisterData;
@@ -22,10 +23,10 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static uk.gov.register.configuration.FieldBuilder.field;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RecordListViewTest {
@@ -47,7 +48,9 @@ public class RecordListViewTest {
                 )
         );
         RegisterData registerData = new RegisterData(ImmutableMap.of("register", new TextNode("address")));
-        RecordListView recordListView = new RecordListView(requestContext, null, null, null, new ItemConverter(new FieldsConfiguration(Optional.empty()), requestContext, () -> "test.register.gov.uk"), records, () -> "test.register.gov.uk", registerData);
+        ImmutableMap<String, Field> fields = ImmutableMap.of("address", field("address"), "street", field("street"));
+        FieldsConfiguration fieldsConfiguration = fields::get;
+        RecordListView recordListView = new RecordListView(requestContext, null, null, null, new ItemConverter(fieldsConfiguration, requestContext, () -> "test.register.gov.uk"), records, () -> "test.register.gov.uk", registerData);
 
         Map<String, RecordView> result = recordListView.recordsJson();
         assertThat(result.size(), equalTo(2));

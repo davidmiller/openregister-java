@@ -6,19 +6,24 @@ import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.db.DataSourceFactory;
 import uk.gov.organisation.client.GovukClientConfiguration;
 import uk.gov.register.auth.RegisterAuthenticatorFactory;
+import uk.gov.register.configuration.FieldsConfiguration;
 import uk.gov.register.configuration.RegisterDataConfiguration;
 import uk.gov.register.configuration.RegisterDomainConfiguration;
 import uk.gov.register.configuration.RegisterNameConfiguration;
 import uk.gov.register.configuration.ResourceConfiguration;
+import uk.gov.register.core.Field;
 import uk.gov.register.core.RegisterData;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
+import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 
 public class RegisterConfiguration extends Configuration
-        implements RegisterNameConfiguration, RegisterDomainConfiguration, ResourceConfiguration, GovukClientConfiguration, RegisterDataConfiguration {
+        implements RegisterNameConfiguration, RegisterDomainConfiguration, ResourceConfiguration,
+        GovukClientConfiguration, RegisterDataConfiguration, FieldsConfiguration {
     @Valid
     @NotNull
     @JsonProperty
@@ -50,6 +55,12 @@ public class RegisterConfiguration extends Configuration
     @JsonProperty
     private String cloudWatchEnvironmentName;
 
+    @SuppressWarnings("unused")
+    @Valid
+    @JsonProperty
+    @NotNull
+    private Collection<Field> fields;
+
     @Override
     public String getRegisterDomain() {
         return registerDomain;
@@ -65,6 +76,11 @@ public class RegisterConfiguration extends Configuration
 
     public String getRegister() {
         return register.getRegister().getRegisterName();
+    }
+
+    @Override
+    public Field getField(String fieldName) {
+        return fields.stream().filter(f -> Objects.equals(f.fieldName, fieldName)).findFirst().get();
     }
 
     @Override

@@ -28,6 +28,42 @@ register:
   register: "school"
   registry: "department-for-education"
 
+fields:
+  - field: school
+    datatype: string
+    cardinality: 1
+  - field: name
+    datatype: string
+    cardinality: 1
+  - field: start-date
+    datatype: datetime
+    cardinality: 1
+  - field: end-date
+    datatype: datetime
+    cardinality: 1
+  - field: gender
+    datatype: string
+    cardinality: 1
+  - field: religious-character
+    datatype: string
+    cardinality: 1
+  - field: maximum-age
+    datatype: string
+    cardinality: 1
+  - field: minimum-age
+    datatype: string
+    cardinality: 1
+  - field: headteacher
+    datatype: string
+    cardinality: 1
+  - field: website
+    datatype: string
+    cardinality: 1
+  - field: address
+    datatype: string
+    register: address
+    cardinality: 1
+
 registerDomain: test.register.gov.uk
 
 credentials:

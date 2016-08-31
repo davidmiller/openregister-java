@@ -29,6 +29,38 @@ register:
   copyright: "Contains Ordnance Survey data © Crown copyright & database right 2015\n\
     \ Contains Royal Mail data © Royal Mail copyright & database right 2015\n"
 
+fields:
+  - field: address
+    datatype: address
+    cardinality: 1
+  - field: property
+    datatype: address
+    cardinality: 1
+  - field: street
+    datatype: address
+    cardinality: 1
+  - field: locality
+    datatype: address
+    cardinality: 1
+  - field: town
+    datatype: address
+    cardinality: 1
+  - field: area
+    datatype: address
+    cardinality: 1
+  - field: postcode
+    datatype: address
+    cardinality: 1
+  - field: country
+    datatype: address
+    cardinality: 1
+  - field: latitude
+    datatype: address
+    cardinality: 1
+  - field: longitude
+    datatype: address
+    cardinality: 1
+
 registerDomain: test.register.gov.uk
 
 credentials:

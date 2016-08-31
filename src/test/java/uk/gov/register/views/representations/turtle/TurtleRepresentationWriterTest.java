@@ -11,8 +11,6 @@ import uk.gov.register.resources.RequestContext;
 import uk.gov.register.service.ItemConverter;
 import uk.gov.register.views.EntryView;
 import uk.gov.register.views.ItemView;
-import uk.gov.register.views.representations.turtle.EntryTurtleWriter;
-import uk.gov.register.views.representations.turtle.ItemTurtleWriter;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -22,9 +20,6 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class TurtleRepresentationWriterTest {
     private RequestContext requestContext;
@@ -45,13 +40,9 @@ public class TurtleRepresentationWriterTest {
             public String getScheme() { return "http"; }
         };
 
-        FieldsConfiguration fieldsConfiguration = mock(FieldsConfiguration.class);
-        when(fieldsConfiguration.getField(anyString())).thenAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            String fieldName = (String) args[0];
-            return fieldsConfigurationMap.containsKey(fieldName)
-                    ? fieldsConfigurationMap.get(fieldName) : new Field(fieldName, "", "", Cardinality.ONE, "");
-        });
+        FieldsConfiguration fieldsConfiguration = fieldName ->
+                fieldsConfigurationMap.getOrDefault(fieldName,
+                        new Field(fieldName, "", "", Cardinality.ONE, ""));
 
         itemConverter = new ItemConverter(fieldsConfiguration, requestContext, () -> "test.register.gov.uk");
     }

@@ -21,7 +21,6 @@ import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.skife.jdbi.v2.DBI;
 import uk.gov.organisation.client.GovukOrganisationClient;
-import uk.gov.register.configuration.FieldsConfiguration;
 import uk.gov.register.configuration.PublicBodiesConfiguration;
 import uk.gov.register.core.RegisterData;
 import uk.gov.register.core.User;
@@ -83,7 +82,6 @@ public class RegisterApplication extends Application<RegisterConfiguration> {
         EntryQueryDAO entryDAO = jdbi.onDemand(EntryQueryDAO.class);
         RecordQueryDAO recordDAO = jdbi.onDemand(RecordQueryDAO.class);
 
-        FieldsConfiguration mintFieldsConfiguration = new FieldsConfiguration(Optional.ofNullable(System.getProperty("fieldsYaml")));
         RegisterData registerData = configuration.getRegisterData();
 
         JerseyEnvironment jersey = environment.jersey();
@@ -99,7 +97,6 @@ public class RegisterApplication extends Application<RegisterConfiguration> {
                 bind(itemDAO).to(ItemQueryDAO.class);
                 bind(entryDAO).to(EntryQueryDAO.class);
                 bind(recordDAO).to(RecordQueryDAO.class);
-                bind(mintFieldsConfiguration).to(FieldsConfiguration.class);
                 bind(registerData).to(RegisterData.class);
                 bind(new PublicBodiesConfiguration(Optional.ofNullable(System.getProperty("publicBodiesYaml")))).to(PublicBodiesConfiguration.class);
 

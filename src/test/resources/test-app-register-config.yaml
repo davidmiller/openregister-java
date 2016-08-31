@@ -23,6 +23,28 @@ register:
   register: "register"
   registry: "cabinet-office"
 
+fields:
+  - field: register
+    datatype: string
+    cardinality: 1
+    register: register
+  - field: text
+    datatype: text
+    cardinality: 1
+  - field: registry
+    datatype: string
+    cardinality: 1
+  - field: phase
+    datatype: string
+    cardinality: 1
+  - field: copyright
+    datatype: text
+    cardinality: 1
+  - field: fields
+    cardinality: n
+    datatype: string
+    register: field
+
 registerDomain: test.register.gov.uk
 
 credentials:

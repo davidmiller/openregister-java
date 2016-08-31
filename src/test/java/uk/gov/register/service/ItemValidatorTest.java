@@ -7,24 +7,32 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.register.configuration.FieldsConfiguration;
+import uk.gov.register.core.Cardinality;
+import uk.gov.register.core.Field;
 import uk.gov.register.core.RegisterData;
 import uk.gov.register.exceptions.ItemValidationException;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static uk.gov.register.configuration.FieldBuilder.field;
 
 public class ItemValidatorTest {
+    public static final ImmutableList<Field> FIELDS = ImmutableList.of(
+            field("register"),
+            field("text", "text"),
+            field("fields", Cardinality.MANY));
+
     public static final Map REGISTER_CONFIG = ImmutableMap.of(
-            "fields", ImmutableList.of("register", "text", "fields"),
+            "fields", FIELDS.stream().map(f -> f.fieldName).collect(Collectors.toList()),
             "register", "register");
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private FieldsConfiguration fieldsConfiguration = new FieldsConfiguration(Optional.empty());
+    private FieldsConfiguration fieldsConfiguration = fieldName -> FIELDS.stream().filter(f -> f.fieldName.equals(fieldName)).findFirst().get();
 
     private ItemValidator itemValidator;
 
