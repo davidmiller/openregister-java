@@ -8,6 +8,9 @@ import org.skife.jdbi.v2.sqlobject.mixins.GetHandle;
 import uk.gov.register.core.Entry;
 import uk.gov.register.core.Item;
 import uk.gov.register.core.Record;
+import uk.gov.register.core.external.CommandResult;
+import uk.gov.register.core.external.ICommandExecutor;
+import uk.gov.register.core.external.RegisterCommand;
 
 import java.time.Instant;
 import java.util.List;
@@ -16,9 +19,10 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 public abstract class EntryStore implements GetHandle {
-    private final EntryDAO entryDAO;
-    private final ItemDAO itemDAO;
-    private final DestinationDBUpdateDAO destinationDBUpdateDAO;
+    public final EntryDAO entryDAO;
+    public final ItemDAO itemDAO;
+    public final DestinationDBUpdateDAO destinationDBUpdateDAO;
+    private ICommandExecutor commandExecutor;
 
     public EntryStore() {
         Handle handle = getHandle();
@@ -47,6 +51,21 @@ public abstract class EntryStore implements GetHandle {
         destinationDBUpdateDAO.upsertInCurrentKeysTable(registerName, records);
 
         entryDAO.setEntryNumber(currentEntryNumber.get());
+    }
+
+//    @Transaction(TransactionIsolationLevel.SERIALIZABLE)
+    public void load2(String registerName, Iterable<RegisterCommand> commands) {
+
+        commands.forEach(command -> {
+            CommandResult commandResult = commandExecutor.execute(command);
+            System.out.println(String.format("%s - %s with result: %s", commandResult.getCommandStatus().name(), command.getClass().getName(), commandResult.getMessage()));
+        });
+
+    }
+
+
+    public void setCommandExecutor(ICommandExecutor commandExecutor) {
+        this.commandExecutor = commandExecutor;
     }
 }
 

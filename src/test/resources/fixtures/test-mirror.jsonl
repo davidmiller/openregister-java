@@ -1,0 +1,3 @@
+{ "add-item": {	"end-date": "1991-12-25", "country": "SU", "official-name": "Union of Soviet Socialist Republics", "name": "USSR", "citizen-names": "Soviet citizen" } }
+{ "append-entry": { "digest-algorithm": "sha-256", "item-hash": "sha-256:e94c4a9ab00d951dadde848ee2c9fe51628b22ff2e0a88bff4cca6e4e6086d7a", "entry-timestamp": "2016-04-05T13:23:05Z" } }
+{ "assert-root-hash": "7da61dc8478bf7d6def340c750aebf0c582bdf311205f0e0401d4e76844842be" }

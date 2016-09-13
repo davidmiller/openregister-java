@@ -20,6 +20,6 @@ server:
 
 registerDomain: openregister.dev:8080
 
-register: school
+register: country
 
 enableDownloadResource: true

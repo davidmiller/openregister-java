@@ -24,8 +24,8 @@ import uk.gov.organisation.client.GovukOrganisationClient;
 import uk.gov.register.configuration.FieldsConfiguration;
 import uk.gov.register.configuration.PublicBodiesConfiguration;
 import uk.gov.register.configuration.RegistersConfiguration;
-import uk.gov.register.core.RegisterData;
-import uk.gov.register.core.User;
+import uk.gov.register.core.*;
+import uk.gov.register.core.external.*;
 import uk.gov.register.db.EntryQueryDAO;
 import uk.gov.register.db.EntryStore;
 import uk.gov.register.db.ItemQueryDAO;
@@ -88,6 +88,21 @@ public class RegisterApplication extends Application<RegisterConfiguration> {
         FieldsConfiguration mintFieldsConfiguration = new FieldsConfiguration(Optional.ofNullable(System.getProperty("fieldsYaml")));
         RegisterData registerData = registersConfiguration.getRegisterData(configuration.getRegister());
 
+        AddItemCommandHandler aicHandler = new AddItemCommandHandler(entryStore);
+        AppendEntryCommandHandler aecHandler = new AppendEntryCommandHandler(entryStore, configuration.getRegister());
+
+        VerifiableLogService verifiableLogService = new VerifiableLogService(entryDAO, new InMemoryPowOfTwo());
+        AssertRootHashCommandHandler arhcHandler = new AssertRootHashCommandHandler(verifiableLogService);
+
+        CommandExecutor commandExecutor = new CommandExecutor();
+        commandExecutor.register(aicHandler);
+        commandExecutor.register(aecHandler);
+        commandExecutor.register(arhcHandler);
+
+//        cannot inject ??
+        entryStore.setCommandExecutor(commandExecutor);
+
+
         JerseyEnvironment jersey = environment.jersey();
         DropwizardResourceConfig resourceConfig = jersey.getResourceConfig();
 
@@ -97,6 +112,7 @@ public class RegisterApplication extends Application<RegisterConfiguration> {
         jersey.register(new AbstractBinder() {
             @Override
             protected void configure() {
+                bind(commandExecutor).to(ICommandExecutor.class);
                 bind(entryStore).to(EntryStore.class);
                 bind(itemDAO).to(ItemQueryDAO.class);
                 bind(entryDAO).to(EntryQueryDAO.class);
