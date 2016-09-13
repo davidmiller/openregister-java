@@ -19,7 +19,8 @@ public class EntryMerkleLeafStore implements MerkleLeafStore {
 
     @Override
     public byte[] getLeafValue(int i) {
-        return bytesFromEntry(entryIteratorDAO.findByEntryNumber(i + 1));
+//        return bytesFromEntry(entryIteratorDAO.findByEntryNumber(i + 1));
+        return bytesFromEntry(entryDAO.findByEntryNumber(i+1).get());
     }
 
     @Override

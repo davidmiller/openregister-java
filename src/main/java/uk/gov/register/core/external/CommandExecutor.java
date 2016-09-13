@@ -3,9 +3,6 @@ package uk.gov.register.core.external;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by christopherd on 13/09/2016.
- */
 public class CommandExecutor implements ICommandExecutor {
 
     private Map<Class, CommandHandler> handlers = new HashMap<>();
@@ -26,6 +23,7 @@ public class CommandExecutor implements ICommandExecutor {
 
         } catch (Exception e) {
             result = CommandResult.Failed(e.getMessage());
+            throw e;
         }
         return result;
     }

@@ -79,9 +79,9 @@ public class RegisterApplication extends Application<RegisterConfiguration> {
         DBIFactory dbiFactory = new DBIFactory();
         DBI jdbi = dbiFactory.build(environment, configuration.getDatabase(), "postgres");
 
+        EntryQueryDAO entryDAO = jdbi.onDemand(EntryQueryDAO.class);
         EntryStore entryStore = jdbi.open().attach(EntryStore.class);
         ItemQueryDAO itemDAO = jdbi.onDemand(ItemQueryDAO.class);
-        EntryQueryDAO entryDAO = jdbi.onDemand(EntryQueryDAO.class);
         RecordQueryDAO recordDAO = jdbi.onDemand(RecordQueryDAO.class);
 
         RegistersConfiguration registersConfiguration = new RegistersConfiguration(Optional.ofNullable(System.getProperty("registersYaml")));
@@ -90,9 +90,7 @@ public class RegisterApplication extends Application<RegisterConfiguration> {
 
         AddItemCommandHandler aicHandler = new AddItemCommandHandler(entryStore);
         AppendEntryCommandHandler aecHandler = new AppendEntryCommandHandler(entryStore, configuration.getRegister());
-
-        VerifiableLogService verifiableLogService = new VerifiableLogService(entryDAO, new InMemoryPowOfTwo());
-        AssertRootHashCommandHandler arhcHandler = new AssertRootHashCommandHandler(verifiableLogService);
+        AssertRootHashCommandHandler arhcHandler = new AssertRootHashCommandHandler(entryStore);
 
         CommandExecutor commandExecutor = new CommandExecutor();
         commandExecutor.register(aicHandler);

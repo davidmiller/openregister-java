@@ -1,12 +1,12 @@
 package uk.gov.register.db;
 
 import org.skife.jdbi.v2.ResultIterator;
-import org.skife.jdbi.v2.sqlobject.Bind;
-import org.skife.jdbi.v2.sqlobject.SqlQuery;
+import org.skife.jdbi.v2.sqlobject.*;
 import org.skife.jdbi.v2.sqlobject.customizers.FetchSize;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 import org.skife.jdbi.v2.sqlobject.customizers.SingleValueResult;
 import org.skife.jdbi.v2.sqlobject.mixins.Transactional;
+import org.skife.jdbi.v2.sqlobject.stringtemplate.UseStringTemplate3StatementLocator;
 import uk.gov.register.core.Entry;
 import uk.gov.register.db.mappers.EntryMapper;
 import uk.gov.register.db.mappers.LongTimestampToInstantMapper;
@@ -15,6 +15,9 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Optional;
 
+
+
+@UseStringTemplate3StatementLocator("/sql/entry.sql")
 public interface EntryQueryDAO extends Transactional<EntryQueryDAO> {
     @RegisterMapper(EntryMapper.class)
     @SingleValueResult(Entry.class)
@@ -42,4 +45,16 @@ public interface EntryQueryDAO extends Transactional<EntryQueryDAO> {
     @RegisterMapper(EntryMapper.class)
     @FetchSize(262144) // Has to be non-zero to enable cursor mode https://jdbc.postgresql.org/documentation/head/query.html#query-with-cursor
     ResultIterator<Entry> entriesIteratorFrom(@Bind("entryNumber") int entryNumber);
+
+    @SqlUpdate
+    void ensureSchema();
+
+    @SqlBatch("insert into entry(entry_number, sha256hex, timestamp) values(:entryNumber, :sha256hex, :timestampAsLong)")
+    void insertInBatch(@BindBean Iterable<Entry> entries);
+
+    @SqlQuery("select value from current_entry_number")
+    int currentEntryNumber();
+
+    @SqlUpdate("update current_entry_number set value=:entryNumber")
+    void setEntryNumber(@Bind("entryNumber") int currentEntryNumber);
 }

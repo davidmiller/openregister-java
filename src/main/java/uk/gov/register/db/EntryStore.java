@@ -19,14 +19,14 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 public abstract class EntryStore implements GetHandle {
-    public final EntryDAO entryDAO;
+    public final EntryQueryDAO entryDAO;
     public final ItemDAO itemDAO;
     public final DestinationDBUpdateDAO destinationDBUpdateDAO;
     private ICommandExecutor commandExecutor;
 
     public EntryStore() {
         Handle handle = getHandle();
-        this.entryDAO = handle.attach(EntryDAO.class);
+        this.entryDAO = handle.attach(EntryQueryDAO.class);
         this.itemDAO = handle.attach(ItemDAO.class);
         this.destinationDBUpdateDAO = handle.attach(DestinationDBUpdateDAO.class);
         this.entryDAO.ensureSchema();
@@ -53,12 +53,13 @@ public abstract class EntryStore implements GetHandle {
         entryDAO.setEntryNumber(currentEntryNumber.get());
     }
 
-//    @Transaction(TransactionIsolationLevel.SERIALIZABLE)
+    @Transaction(TransactionIsolationLevel.SERIALIZABLE)
     public void load2(String registerName, Iterable<RegisterCommand> commands) {
 
         commands.forEach(command -> {
             CommandResult commandResult = commandExecutor.execute(command);
             System.out.println(String.format("%s - %s with result: %s", commandResult.getCommandStatus().name(), command.getClass().getName(), commandResult.getMessage()));
+
         });
 
     }
