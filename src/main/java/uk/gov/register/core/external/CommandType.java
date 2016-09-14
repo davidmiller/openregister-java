@@ -1,15 +1,13 @@
 package uk.gov.register.core.external;
 
-/**
- * Created by christopherd on 13/09/2016.
- */
-public enum CommandTypes {
-    AddItem("add-item"),
-    AppendEntry("append-entry");
+public enum CommandType {
+    ADD_ITEM("add-item"),
+    APPEND_ENTRY("append-entry"),
+    ASSERT_ROOT_HASH("assert-root-hash");
 
     private final String name;
 
-    private CommandTypes(String s) {
+    CommandType(String s) {
         name = s;
     }
 

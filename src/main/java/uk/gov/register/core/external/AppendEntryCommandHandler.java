@@ -10,18 +10,17 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class AppendEntryCommandHandler extends CommandHandler<AppendEntryCommand> {
+public class AppendEntryCommandHandler implements CommandHandler {
     private EntryStore entryStore;
     private String register;
 
     public AppendEntryCommandHandler(EntryStore entryStore, String register) {
-        super(AppendEntryCommand.class);
         this.entryStore = entryStore;
         this.register = register;
     }
 
     @Override
-    void handle(AppendEntryCommand command) {
+    public void handle(RegisterCommand command) {
         AtomicInteger currentEntryNumber = new AtomicInteger(entryStore.entryDAO.currentEntryNumber());
         String sha256 = command.getData().get("item-hash").replace("sha-256:", "");
         Instant entryTimestamp = Instant.parse(command.getData().get("entry-timestamp"));
@@ -34,5 +33,10 @@ public class AppendEntryCommandHandler extends CommandHandler<AppendEntryCommand
         entryStore.destinationDBUpdateDAO.upsertInCurrentKeysTable(register, Arrays.asList(record));
 
         entryStore.entryDAO.setEntryNumber(currentEntryNumber.get());
+    }
+
+    @Override
+    public String getHandlerType() {
+        return String.valueOf(CommandType.APPEND_ENTRY);
     }
 }

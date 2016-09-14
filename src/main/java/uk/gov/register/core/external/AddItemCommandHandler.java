@@ -7,20 +7,24 @@ import uk.gov.register.db.EntryStore;
 
 import java.util.Arrays;
 
-public class AddItemCommandHandler extends CommandHandler<AddItemCommand> {
+public class AddItemCommandHandler implements CommandHandler {
     private EntryStore entryStore;
 
     public AddItemCommandHandler(EntryStore entryStore) {
-        super(AddItemCommand.class);
         this.entryStore = entryStore;
     }
 
     @Override
-    void handle(AddItemCommand command) {
+    public void handle(RegisterCommand command) {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode content = mapper.convertValue(command.getData(), JsonNode.class);
         Item newItem = new Item(content);
         entryStore.itemDAO.insertInBatch(Arrays.asList(newItem));
+    }
+
+    @Override
+    public String getHandlerType() {
+        return String.valueOf(CommandType.ADD_ITEM);
     }
 
 }

@@ -3,6 +3,7 @@ package uk.gov.register.core.external;
 import uk.gov.register.core.Entry;
 import uk.gov.register.core.Item;
 import uk.gov.register.core.Record;
+import uk.gov.register.core.external.CommandHandler;
 import uk.gov.register.db.EntryMerkleLeafStore;
 import uk.gov.register.db.EntryQueryDAO;
 import uk.gov.register.db.EntryStore;
@@ -19,28 +20,27 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class AssertRootHashCommandHandler extends CommandHandler<AssertRootHashCommand> {
+public class AssertRootHashCommandHandler implements CommandHandler {
 
     private final VerifiableLog verifiableLog;
-    private EntryStore entryStore;
 
     public AssertRootHashCommandHandler(EntryStore entryStore) throws NoSuchAlgorithmException {
-        super(AssertRootHashCommand.class);
-        this.entryStore = entryStore;
         this.verifiableLog = createVerifiableLog(entryStore.entryDAO);
     }
 
     @Override
-    void handle(AssertRootHashCommand command) {
-
-
+    public void handle(RegisterCommand command) {
         String expectedRootHash = command.getData().get("assert-root-hash");
         String actualRootHash = bytesToString(verifiableLog.currentRoot());
         if (!expectedRootHash.equals(actualRootHash)){
             throw new RuntimeException(String.format("Assert root hash - expected: %s, actual: %s", expectedRootHash, actualRootHash));
         }
 
+    }
 
+    @Override
+    public String getHandlerType() {
+        return String.valueOf(CommandType.ASSERT_ROOT_HASH);
     }
 
     private VerifiableLog createVerifiableLog(EntryQueryDAO entryDAO) throws NoSuchAlgorithmException {
@@ -50,5 +50,6 @@ public class AssertRootHashCommandHandler extends CommandHandler<AssertRootHashC
     private String bytesToString(byte[] bytes) {
         return DatatypeConverter.printHexBinary(bytes).toLowerCase();
     }
-
 }
+
+

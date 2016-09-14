@@ -26,6 +26,7 @@ import uk.gov.register.configuration.PublicBodiesConfiguration;
 import uk.gov.register.configuration.RegistersConfiguration;
 import uk.gov.register.core.*;
 import uk.gov.register.core.external.*;
+import uk.gov.register.core.external.AssertRootHashCommandHandler;
 import uk.gov.register.db.EntryQueryDAO;
 import uk.gov.register.db.EntryStore;
 import uk.gov.register.db.ItemQueryDAO;
@@ -92,7 +93,7 @@ public class RegisterApplication extends Application<RegisterConfiguration> {
         AppendEntryCommandHandler aecHandler = new AppendEntryCommandHandler(entryStore, configuration.getRegister());
         AssertRootHashCommandHandler arhcHandler = new AssertRootHashCommandHandler(entryStore);
 
-        CommandExecutor commandExecutor = new CommandExecutor();
+        CommandExecutor commandExecutor = new CommandExecutor(entryStore);
         commandExecutor.register(aicHandler);
         commandExecutor.register(aecHandler);
         commandExecutor.register(arhcHandler);

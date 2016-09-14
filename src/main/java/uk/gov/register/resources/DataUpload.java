@@ -21,6 +21,7 @@ import javax.ws.rs.core.Context;
 import java.lang.reflect.Array;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -72,35 +73,23 @@ public class DataUpload {
         try {
             Iterable<JsonNode> objects = objectReconstructor.reconstruct(payload.split("\n"));
             ObjectMapper mapper = new ObjectMapper();
-
-//                        this needs cleaning
-//            List<RegisterCommand> commands = StreamSupport.stream(objects.spliterator(), false)
-//                    .map(node -> {
-//                        Map nodeMap = mapper.convertValue(node, Map.class);
-//                        RegisterCommand result = null;
-//                        if (nodeMap.containsKey("add-item")) {
-//                            result = new AddItemCommand(mapper.convertValue(nodeMap.get("add-item"), Map.class));
-//                        } else if (nodeMap.containsKey("append-entry")) {
-//                            result = new AppendEntryCommand(mapper.convertValue(nodeMap.get("append-entry"), Map.class));
-//                        }
-//
-//                        return result;
-//                    })
-//                    .filter(p -> p != null)
-//                    .collect(Collectors.toList());
             List<RegisterCommand> commands = new ArrayList<>();
             objects.forEach(node -> {
-                Map nodeMap = mapper.convertValue(node, Map.class);
-                if (nodeMap.containsKey("add-item")) {
-                    commands.add(new AddItemCommand(mapper.convertValue(nodeMap.get("add-item"), Map.class)));
-                } else if (nodeMap.containsKey("append-entry")) {
-                    commands.add(new AppendEntryCommand(mapper.convertValue(nodeMap.get("append-entry"), Map.class)));
-                } else if (nodeMap.containsKey("assert-root-hash")) {
-                    commands.add(new AssertRootHashCommand(mapper.convertValue(nodeMap, Map.class)));
+                if (node.fieldNames().hasNext()) {
+                    String commandType = node.fieldNames().next();
+                    JsonNode message = node.get(commandType);
+
+                    if(message.isTextual()){
+                        commands.add(new RegisterCommand(commandType,mapper.convertValue(node, Map.class)));
+                    }else{
+                        commands.add(new RegisterCommand(commandType,mapper.convertValue(message, Map.class)));
+                    }
+
                 }
             });
 
-            entryStore.load2(registerPrimaryKey, commands);
+//            entryStore.load2(registerPrimaryKey, commands);
+            commandExecutor.execute(commands);
 
 
         } catch (Throwable t) {

@@ -9,6 +9,7 @@ import uk.gov.register.core.Entry;
 import uk.gov.register.core.Item;
 import uk.gov.register.core.Record;
 import uk.gov.register.core.external.CommandResult;
+import uk.gov.register.core.external.CommandStatus;
 import uk.gov.register.core.external.ICommandExecutor;
 import uk.gov.register.core.external.RegisterCommand;
 
@@ -23,9 +24,10 @@ public abstract class EntryStore implements GetHandle {
     public final ItemDAO itemDAO;
     public final DestinationDBUpdateDAO destinationDBUpdateDAO;
     private ICommandExecutor commandExecutor;
+    public final Handle handle;
 
     public EntryStore() {
-        Handle handle = getHandle();
+        this.handle = getHandle();
         this.entryDAO = handle.attach(EntryQueryDAO.class);
         this.itemDAO = handle.attach(ItemDAO.class);
         this.destinationDBUpdateDAO = handle.attach(DestinationDBUpdateDAO.class);
@@ -53,16 +55,35 @@ public abstract class EntryStore implements GetHandle {
         entryDAO.setEntryNumber(currentEntryNumber.get());
     }
 
-    @Transaction(TransactionIsolationLevel.SERIALIZABLE)
+    //    @Transaction(TransactionIsolationLevel.SERIALIZABLE)
     public void load2(String registerName, Iterable<RegisterCommand> commands) {
-
-        commands.forEach(command -> {
+        handle.begin();
+        Boolean shouldCommit = true;
+        for (RegisterCommand command : commands) {
             CommandResult commandResult = commandExecutor.execute(command);
-            System.out.println(String.format("%s - %s with result: %s", commandResult.getCommandStatus().name(), command.getClass().getName(), commandResult.getMessage()));
+            System.out.println(String.format("%s - %s with result: %s", commandResult.getCommandStatus().name(), command.getCommandType(), commandResult.getMessage()));
+            if (commandResult.getCommandStatus() == CommandStatus.Failed) {
+                shouldCommit = false;
+                break;
+            }
+        }
 
-        });
+        if (shouldCommit) {
+            handle.commit();
+        } else {
+            handle.rollback();
+        }
+
+
+//        commands.forEach(command -> {
+//            CommandResult commandResult = commandExecutor.execute(command);
+//            System.out.println(String.format("%s - %s with result: %s", commandResult.getCommandStatus().name(), command.getCommandType(), commandResult.getMessage()));
+//
+//        });
 
     }
+
+
 
 
     public void setCommandExecutor(ICommandExecutor commandExecutor) {
