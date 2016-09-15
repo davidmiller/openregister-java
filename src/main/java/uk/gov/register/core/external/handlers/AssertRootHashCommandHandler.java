@@ -1,9 +1,12 @@
-package uk.gov.register.core.external;
+package uk.gov.register.core.external.handlers;
 
 import uk.gov.register.core.Entry;
 import uk.gov.register.core.Item;
 import uk.gov.register.core.Record;
 import uk.gov.register.core.external.CommandHandler;
+import uk.gov.register.core.external.CommandType;
+import uk.gov.register.core.external.ExecutionResult;
+import uk.gov.register.core.external.RegisterCommand;
 import uk.gov.register.db.EntryMerkleLeafStore;
 import uk.gov.register.db.EntryQueryDAO;
 import uk.gov.register.db.EntryStore;
@@ -29,13 +32,11 @@ public class AssertRootHashCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handle(RegisterCommand command) {
+    public ExecutionResult handle(RegisterCommand command) {
         String expectedRootHash = command.getData().get("assert-root-hash");
         String actualRootHash = bytesToString(verifiableLog.currentRoot());
-        if (!expectedRootHash.equals(actualRootHash)){
-            throw new RuntimeException(String.format("Assert root hash - expected: %s, actual: %s", expectedRootHash, actualRootHash));
-        }
-
+        return expectedRootHash.equals(actualRootHash) ? ExecutionResult.Executed() : ExecutionResult.Failed(String.format("Assert root hash - expected: %s, actual: %s", expectedRootHash, actualRootHash));
+//        return ExecutionResult.Executed();
     }
 
     @Override

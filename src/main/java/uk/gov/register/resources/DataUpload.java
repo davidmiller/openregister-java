@@ -79,12 +79,9 @@ public class DataUpload {
                     String commandType = node.fieldNames().next();
                     JsonNode message = node.get(commandType);
 
-                    if(message.isTextual()){
-                        commands.add(new RegisterCommand(commandType,mapper.convertValue(node, Map.class)));
-                    }else{
-                        commands.add(new RegisterCommand(commandType,mapper.convertValue(message, Map.class)));
-                    }
+                    JsonNode rawCommandData = message.isTextual() ? node : message;
 
+                    commands.add(new RegisterCommand(commandType, mapper.convertValue(rawCommandData, Map.class)));
                 }
             });
 

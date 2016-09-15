@@ -8,7 +8,7 @@ import org.skife.jdbi.v2.sqlobject.mixins.GetHandle;
 import uk.gov.register.core.Entry;
 import uk.gov.register.core.Item;
 import uk.gov.register.core.Record;
-import uk.gov.register.core.external.CommandResult;
+import uk.gov.register.core.external.ExecutionResult;
 import uk.gov.register.core.external.CommandStatus;
 import uk.gov.register.core.external.ICommandExecutor;
 import uk.gov.register.core.external.RegisterCommand;
@@ -24,7 +24,7 @@ public abstract class EntryStore implements GetHandle {
     public final ItemDAO itemDAO;
     public final DestinationDBUpdateDAO destinationDBUpdateDAO;
     private ICommandExecutor commandExecutor;
-    public final Handle handle;
+    private final Handle handle;
 
     public EntryStore() {
         this.handle = getHandle();
@@ -60,9 +60,9 @@ public abstract class EntryStore implements GetHandle {
         handle.begin();
         Boolean shouldCommit = true;
         for (RegisterCommand command : commands) {
-            CommandResult commandResult = commandExecutor.execute(command);
-            System.out.println(String.format("%s - %s with result: %s", commandResult.getCommandStatus().name(), command.getCommandType(), commandResult.getMessage()));
-            if (commandResult.getCommandStatus() == CommandStatus.Failed) {
+            ExecutionResult executionResult = commandExecutor.execute(command);
+            System.out.println(String.format("%s - %s with result: %s", executionResult.getCommandStatus().name(), command.getCommandType(), executionResult.getMessage()));
+            if (executionResult.getCommandStatus() == CommandStatus.Failed) {
                 shouldCommit = false;
                 break;
             }
@@ -76,18 +76,15 @@ public abstract class EntryStore implements GetHandle {
 
 
 //        commands.forEach(command -> {
-//            CommandResult commandResult = commandExecutor.execute(command);
+//            ExecutionResult commandResult = commandExecutor.execute(command);
 //            System.out.println(String.format("%s - %s with result: %s", commandResult.getCommandStatus().name(), command.getCommandType(), commandResult.getMessage()));
 //
 //        });
 
     }
 
-
-
-
-    public void setCommandExecutor(ICommandExecutor commandExecutor) {
-        this.commandExecutor = commandExecutor;
-    }
+//    public void setCommandExecutor(ICommandExecutor commandExecutor) {
+//        this.commandExecutor = commandExecutor;
+//    }
 }
 

@@ -26,7 +26,11 @@ import uk.gov.register.configuration.PublicBodiesConfiguration;
 import uk.gov.register.configuration.RegistersConfiguration;
 import uk.gov.register.core.*;
 import uk.gov.register.core.external.*;
-import uk.gov.register.core.external.AssertRootHashCommandHandler;
+import uk.gov.register.core.external.assertions.DateTimeAssertionHandler;
+import uk.gov.register.core.external.assertions.NotEmptyAssertionHandler;
+import uk.gov.register.core.external.handlers.AssertRootHashCommandHandler;
+import uk.gov.register.core.external.handlers.AddItemCommandHandler;
+import uk.gov.register.core.external.handlers.AppendEntryCommandHandler;
 import uk.gov.register.db.EntryQueryDAO;
 import uk.gov.register.db.EntryStore;
 import uk.gov.register.db.ItemQueryDAO;
@@ -89,17 +93,23 @@ public class RegisterApplication extends Application<RegisterConfiguration> {
         FieldsConfiguration mintFieldsConfiguration = new FieldsConfiguration(Optional.ofNullable(System.getProperty("fieldsYaml")));
         RegisterData registerData = registersConfiguration.getRegisterData(configuration.getRegister());
 
-        AddItemCommandHandler aicHandler = new AddItemCommandHandler(entryStore);
-        AppendEntryCommandHandler aecHandler = new AppendEntryCommandHandler(entryStore, configuration.getRegister());
-        AssertRootHashCommandHandler arhcHandler = new AssertRootHashCommandHandler(entryStore);
+        CommandHandler aicHandler = new AddItemCommandHandler(entryStore);
+        CommandHandler aecHandler = new AppendEntryCommandHandler(entryStore, configuration.getRegister());
+        CommandHandler arhcHandler = new AssertRootHashCommandHandler(entryStore);
 
-        CommandExecutor commandExecutor = new CommandExecutor(entryStore);
+        ICommandExecutor commandExecutor = new CommandExecutor(entryStore);
         commandExecutor.register(aicHandler);
         commandExecutor.register(aecHandler);
         commandExecutor.register(arhcHandler);
 
+        AssertionHandler notEmptyAssertionHandler = new NotEmptyAssertionHandler();
+        AssertionHandler dateTimeAssertionHandler = new DateTimeAssertionHandler();
+
+        commandExecutor.register(notEmptyAssertionHandler);
+        commandExecutor.register(dateTimeAssertionHandler);
+
 //        cannot inject ??
-        entryStore.setCommandExecutor(commandExecutor);
+//        entryStore.setCommandExecutor(commandExecutor);
 
 
         JerseyEnvironment jersey = environment.jersey();

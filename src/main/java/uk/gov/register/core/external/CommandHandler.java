@@ -8,7 +8,7 @@ package uk.gov.register.core.external;
 //        this.commandType = commandType;
 //    }
 //
-//    abstract void handle(T command);
+//    abstract void dbHandle(T command);
 //
 //    public final Class<T> getCommandType() {
 //        return commandType;
@@ -17,6 +17,6 @@ package uk.gov.register.core.external;
 //}
 
 public interface CommandHandler {
-    void handle(RegisterCommand command);
+    ExecutionResult handle(RegisterCommand command);
     String getHandlerType();
 }

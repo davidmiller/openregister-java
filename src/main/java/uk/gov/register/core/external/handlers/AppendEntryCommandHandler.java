@@ -1,8 +1,12 @@
-package uk.gov.register.core.external;
+package uk.gov.register.core.external.handlers;
 
 import uk.gov.register.core.Entry;
 import uk.gov.register.core.Item;
 import uk.gov.register.core.Record;
+import uk.gov.register.core.external.CommandHandler;
+import uk.gov.register.core.external.CommandType;
+import uk.gov.register.core.external.ExecutionResult;
+import uk.gov.register.core.external.RegisterCommand;
 import uk.gov.register.db.EntryStore;
 
 import java.time.Instant;
@@ -20,7 +24,7 @@ public class AppendEntryCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handle(RegisterCommand command) {
+    public ExecutionResult handle(RegisterCommand command) {
         AtomicInteger currentEntryNumber = new AtomicInteger(entryStore.entryDAO.currentEntryNumber());
         String sha256 = command.getData().get("item-hash").replace("sha-256:", "");
         Instant entryTimestamp = Instant.parse(command.getData().get("entry-timestamp"));
@@ -33,6 +37,7 @@ public class AppendEntryCommandHandler implements CommandHandler {
         entryStore.destinationDBUpdateDAO.upsertInCurrentKeysTable(register, Arrays.asList(record));
 
         entryStore.entryDAO.setEntryNumber(currentEntryNumber.get());
+        return ExecutionResult.Executed();
     }
 
     @Override
