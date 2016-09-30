@@ -19,7 +19,9 @@ import io.dropwizard.views.ViewBundle;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.process.internal.RequestScoped;
 import org.skife.jdbi.v2.DBI;
+import org.skife.jdbi.v2.Handle;
 import uk.gov.organisation.client.GovukOrganisationClient;
 import uk.gov.register.configuration.FieldsConfiguration;
 import uk.gov.register.configuration.PublicBodiesConfiguration;
@@ -30,6 +32,7 @@ import uk.gov.register.db.RecordIndex;
 import uk.gov.register.db.SchemaCreator;
 import uk.gov.register.filters.UriDataFormatFilter;
 import uk.gov.register.monitoring.CloudWatchHeartbeater;
+import uk.gov.register.providers.HandleFactory;
 import uk.gov.register.resources.RequestContext;
 import uk.gov.register.service.ItemConverter;
 import uk.gov.register.service.ItemValidator;
@@ -114,6 +117,7 @@ public class RegisterApplication extends Application<RegisterConfiguration> {
                 bind(InMemoryPowOfTwoNoLeaves.class).to(MemoizationStore.class).in(Singleton.class);
 
                 bind(PostgresRegister.class).to(Register.class).to(RegisterReadOnly.class);
+                bindFactory(HandleFactory.class).to(Handle.class).in(RequestScoped.class);
                 bind(configuration);
                 bind(client).to(Client.class);
             }

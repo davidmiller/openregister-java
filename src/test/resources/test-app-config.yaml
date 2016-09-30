@@ -30,3 +30,14 @@ database:
     charSet: UTF-8
 
 enableDownloadResource: true
+
+logging:
+
+   # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
+   level: INFO
+
+   # Logger-specific levels.
+   loggers:
+
+      # Overrides the levels of certain packages or files.
+      "org.skife.jdbi.v2": TRACE

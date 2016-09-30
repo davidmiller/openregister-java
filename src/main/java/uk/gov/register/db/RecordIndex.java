@@ -5,11 +5,15 @@ import org.skife.jdbi.v2.Handle;
 import uk.gov.register.core.Entry;
 import uk.gov.register.core.Record;
 
+import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class RecordIndex {
-    public void updateRecordIndex(Handle handle, String registerName, List<Record> records) {
+    @Inject
+    private Handle handle;
+
+    public void updateRecordIndex(String registerName, List<Record> records) {
         CurrentKeysUpdateDAO currentKeysUpdateDAO = handle.attach(CurrentKeysUpdateDAO.class);
         List<CurrentKey> currentKeys = extractCurrentKeys(registerName, records);
         int noOfRecordsDeleted = currentKeysUpdateDAO.removeRecordWithKeys(Lists.transform(currentKeys, r -> r.key));

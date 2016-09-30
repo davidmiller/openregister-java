@@ -24,14 +24,12 @@ import java.util.stream.Collectors;
  * An append-only log of Entries, together with proofs
  */
 public class EntryLog {
-    private final MemoizationStore memoizationStore;
-
     @Inject
-    public EntryLog(MemoizationStore memoizationStore) {
-        this.memoizationStore = memoizationStore;
-    }
+    private MemoizationStore memoizationStore;
+    @Inject
+    private Handle handle;
 
-    public void appendEntries(Handle handle, List<Entry> entries) {
+    public void appendEntries(List<Entry> entries) {
         EntryDAO entryDAO = handle.attach(EntryDAO.class);
         entryDAO.insertInBatch(entries);
         entryDAO.setEntryNumber(entryDAO.currentEntryNumber() + entries.size());
