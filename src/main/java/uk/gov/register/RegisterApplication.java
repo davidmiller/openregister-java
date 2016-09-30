@@ -24,11 +24,7 @@ import uk.gov.organisation.client.GovukOrganisationClient;
 import uk.gov.register.configuration.FieldsConfiguration;
 import uk.gov.register.configuration.PublicBodiesConfiguration;
 import uk.gov.register.configuration.RegistersConfiguration;
-import uk.gov.register.core.PostgresRegister;
-import uk.gov.register.core.Register;
-import uk.gov.register.core.RegisterData;
-import uk.gov.register.core.RegisterReadOnly;
-import uk.gov.register.core.User;
+import uk.gov.register.core.*;
 import uk.gov.register.db.EntryQueryDAO;
 import uk.gov.register.db.RegisterDAO;
 import uk.gov.register.db.SchemaCreator;
@@ -37,7 +33,6 @@ import uk.gov.register.monitoring.CloudWatchHeartbeater;
 import uk.gov.register.resources.RequestContext;
 import uk.gov.register.service.ItemConverter;
 import uk.gov.register.service.ItemValidator;
-import uk.gov.register.service.VerifiableLogService;
 import uk.gov.register.thymeleaf.ThymeleafViewRenderer;
 import uk.gov.register.util.ObjectReconstructor;
 import uk.gov.register.views.ViewFactory;
@@ -110,7 +105,7 @@ public class RegisterApplication extends Application<RegisterConfiguration> {
 
                 bind(ItemValidator.class).to(ItemValidator.class);
                 bind(ObjectReconstructor.class).to(ObjectReconstructor.class);
-                bind(VerifiableLogService.class).to(VerifiableLogService.class);
+                bind(EntryLog.class).to(EntryLog.class);
 
                 bind(RequestContext.class).to(RequestContext.class);
                 bind(ViewFactory.class).to(ViewFactory.class).in(Singleton.class);
