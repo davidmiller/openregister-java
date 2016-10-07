@@ -113,7 +113,7 @@ public class RegisterApplication extends Application<RegisterConfiguration> {
                 bind(GovukOrganisationClient.class).to(GovukOrganisationClient.class).in(Singleton.class);
                 bind(InMemoryPowOfTwoNoLeaves.class).to(MemoizationStore.class).in(Singleton.class);
 
-                bind(PostgresRegister.class).to(Register.class).to(RegisterReadOnly.class);
+                bind(PostgresRegister.class).to(Register.class).to(RegisterReadOnly.class).in(Singleton.class);
                 bind(configuration);
                 bind(client).to(Client.class);
             }

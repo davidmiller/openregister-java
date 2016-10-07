@@ -5,6 +5,7 @@ import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.TransactionIsolationLevel;
 import uk.gov.register.configuration.RegisterNameConfiguration;
 import uk.gov.register.db.RecordIndex;
+import uk.gov.register.exceptions.ItemMissingFromRegisterException;
 import uk.gov.register.views.ConsistencyProof;
 import uk.gov.register.views.EntryProof;
 import uk.gov.register.views.RegisterProof;
@@ -12,9 +13,7 @@ import uk.gov.register.views.RegisterProof;
 import javax.inject.Inject;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -26,6 +25,8 @@ public class PostgresRegister implements Register {
     private final EntryLog entryLog;
     private final ItemStore itemStore;
     private final DBI dbi;
+    private final List<Entry> stagedEntries;
+    private final Set<Item> stagedItems;
 
     @Inject
     public PostgresRegister(RegisterNameConfiguration registerNameConfig,
@@ -38,6 +39,8 @@ public class PostgresRegister implements Register {
         this.entryLog = entryLog;
         this.itemStore = itemStore;
         this.dbi = dbi;
+        this.stagedEntries = new ArrayList<>();
+        this.stagedItems = new HashSet<>();
     }
 
     @Override
@@ -49,8 +52,26 @@ public class PostgresRegister implements Register {
                     .map(item -> new Record(new Entry(currentEntryNumber.incrementAndGet(), item.getSha256hex(), Instant.now()), item))
                     .collect(Collectors.toList());
             entryLog.appendEntries(handle, Lists.transform(records, r -> r.entry));
-            handle.attach(RecordIndex.class).updateRecordIndex(handle, registerName, records);
+            recordIndex.updateRecordIndex(handle, registerName, records);
         });
+    }
+
+    @Override
+    public void addEntry(Entry entry) {
+        if (entry == null) {
+            return;
+        }
+
+        stagedEntries.add(entry);
+    }
+
+    @Override
+    public void addItem(Item item) {
+        if (item == null) {
+            return;
+        }
+
+        stagedItems.add(item);
     }
 
     @Override
@@ -128,5 +149,41 @@ public class PostgresRegister implements Register {
     public ConsistencyProof getConsistencyProof(int totalEntries1, int totalEntries2) {
         return dbi.inTransaction((handle, status) ->
                 entryLog.getConsistencyProof(handle, totalEntries1, totalEntries2));
+    }
+
+    private void mintStagedData() {
+        dbi.useTransaction(TransactionIsolationLevel.SERIALIZABLE, (handle, status) -> {
+            itemStore.putItems(handle, stagedItems);
+
+            // item-hash to item
+            Map<String, Item> itemsByHash = stagedItems.stream()
+                    .collect(Collectors.toMap(Item::getSha256hex, i -> i));
+
+            List<Record> records = stagedEntries.stream()
+                    .map(entry -> {
+                        String hash = entry.getSha256hex();
+                        Item item;
+
+                        if (itemsByHash.containsKey(hash)) {
+                            item = itemsByHash.get(hash);
+                        } else {
+                            try {
+                                item = itemStore.getItemBySha256(handle, hash).get();
+                            } catch (NoSuchElementException ex) {
+                                throw new ItemMissingFromRegisterException(hash);
+                            }
+                        }
+
+                        return new Record(entry, item);
+                    })
+                    .collect(Collectors.toList());
+
+            entryLog.appendEntries(handle, Lists.transform(records, r -> r.entry));
+            recordIndex.updateRecordIndex(handle, registerName, records);
+
+            // Flush the staging data
+            stagedEntries.clear();
+            stagedItems.clear();
+        });
     }
 }
