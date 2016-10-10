@@ -11,8 +11,8 @@ import java.time.Instant;
 public class CommandHelper {
     private final ObjectMapper objectMapper;
 
-    public CommandHelper(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    public CommandHelper() {
+        this.objectMapper = new ObjectMapper();
     }
 
     public Item getItem(RegisterCommand command) {

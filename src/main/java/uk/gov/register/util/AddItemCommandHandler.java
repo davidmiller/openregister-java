@@ -10,9 +10,9 @@ public class AddItemCommandHandler implements CommandHandler {
     private final CommandHelper commandHelper;
 
     @Inject
-    public AddItemCommandHandler(Register register, CommandHelper commandHelper) {
+    public AddItemCommandHandler(Register register) {
         this.register = register;
-        this.commandHelper = commandHelper;
+        this.commandHelper = new CommandHelper();
     }
 
     @Override

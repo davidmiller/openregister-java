@@ -9,10 +9,7 @@ import uk.gov.register.configuration.RegisterNameConfiguration;
 import uk.gov.register.core.Item;
 import uk.gov.register.core.Register;
 import uk.gov.register.service.ItemValidator;
-import uk.gov.register.util.CommandExecutorImpl;
-import uk.gov.register.util.CommandParser;
-import uk.gov.register.util.RegisterCommand;
-import uk.gov.register.util.ObjectReconstructor;
+import uk.gov.register.util.*;
 import uk.gov.register.views.ViewFactory;
 
 import javax.annotation.security.PermitAll;
@@ -33,18 +30,16 @@ public class DataUpload {
     private ItemValidator itemValidator;
     private Register register;
     private CommandParser commandParser;
-    private Iterable<RegisterCommand> registerCommands;
-    private CommandExecutorImpl commandExecutor;
+    private CommandExecutor commandExecutor;
 
     @Inject
-    public DataUpload(ViewFactory viewFactory, RegisterNameConfiguration registerNameConfiguration, ObjectReconstructor objectReconstructor, ItemValidator itemValidator, Register register, CommandParser commandParser, Iterable<RegisterCommand> registerCommands, CommandExecutorImpl commandExecutor) {
+    public DataUpload(ViewFactory viewFactory, RegisterNameConfiguration registerNameConfiguration, ObjectReconstructor objectReconstructor, ItemValidator itemValidator, Register register, CommandParser commandParser, CommandExecutor commandExecutor) {
         this.viewFactory = viewFactory;
         this.objectReconstructor = objectReconstructor;
         this.itemValidator = itemValidator;
         this.register = register;
         this.registerPrimaryKey = registerNameConfiguration.getRegister();
         this.commandParser = commandParser;
-        this.registerCommands = registerCommands;
         this.commandExecutor = commandExecutor;
     }
 
@@ -79,6 +74,8 @@ public class DataUpload {
             registerCommands.forEach(registerCommand -> {
                 commandExecutor.execute(registerCommand);
             });
+
+            register.getRegisterProof();
         } catch (Throwable t) {
             logger.error(Throwables.getStackTraceAsString(t));
         }

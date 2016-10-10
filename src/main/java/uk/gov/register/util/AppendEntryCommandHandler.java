@@ -10,9 +10,9 @@ public class AppendEntryCommandHandler implements CommandHandler {
     private final Register register;
 
     @Inject
-    public AppendEntryCommandHandler(CommandHelper commandHelper, Register register) {
-        this.commandHelper = commandHelper;
+    public AppendEntryCommandHandler(Register register) {
         this.register = register;
+        this.commandHelper = new CommandHelper();
     }
 
     @Override

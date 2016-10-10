@@ -11,9 +11,9 @@ public class AssertRootHashCommandHandler implements CommandHandler {
     private final CommandHelper commandHelper;
 
     @Inject
-    public AssertRootHashCommandHandler(Register register, CommandHelper commandHelper) {
+    public AssertRootHashCommandHandler(Register register) {
         this.register = register;
-        this.commandHelper = commandHelper;
+        this.commandHelper = new CommandHelper();
     }
 
     @Override
