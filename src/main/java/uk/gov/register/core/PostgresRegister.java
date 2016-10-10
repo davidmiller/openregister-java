@@ -86,7 +86,10 @@ public class PostgresRegister implements Register {
 
     @Override
     public int getTotalEntries() {
-        return dbi.withHandle(entryLog::getTotalEntries);
+        int committedEntryCount = dbi.withHandle(entryLog::getTotalEntries);
+        int stagedEntryCount = stagedEntries.size();
+
+        return committedEntryCount + stagedEntryCount;
     }
 
     @Override
@@ -136,6 +139,8 @@ public class PostgresRegister implements Register {
 
     @Override
     public RegisterProof getRegisterProof() throws NoSuchAlgorithmException {
+        mintStagedData();
+
         return dbi.inTransaction((handle, status) -> entryLog.getRegisterProof(handle));
     }
 
@@ -153,6 +158,10 @@ public class PostgresRegister implements Register {
 
     private void mintStagedData() {
         dbi.useTransaction(TransactionIsolationLevel.SERIALIZABLE, (handle, status) -> {
+            if (stagedItems.isEmpty() && stagedEntries.isEmpty()) {
+                return;
+            }
+
             itemStore.putItems(handle, stagedItems);
 
             // item-hash to item

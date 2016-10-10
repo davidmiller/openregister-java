@@ -33,7 +33,7 @@ import uk.gov.register.resources.RequestContext;
 import uk.gov.register.service.ItemConverter;
 import uk.gov.register.service.ItemValidator;
 import uk.gov.register.thymeleaf.ThymeleafViewRenderer;
-import uk.gov.register.util.ObjectReconstructor;
+import uk.gov.register.util.*;
 import uk.gov.register.views.ViewFactory;
 import uk.gov.verifiablelog.store.memoization.InMemoryPowOfTwoNoLeaves;
 import uk.gov.verifiablelog.store.memoization.MemoizationStore;
@@ -88,6 +88,8 @@ public class RegisterApplication extends Application<RegisterConfiguration> {
         JerseyEnvironment jersey = environment.jersey();
         DropwizardResourceConfig resourceConfig = jersey.getResourceConfig();
 
+
+
         Client client = new JerseyClientBuilder(environment).using(configuration.getJerseyClientConfiguration())
                 .build("http-client");
 
@@ -106,6 +108,12 @@ public class RegisterApplication extends Application<RegisterConfiguration> {
                 bind(EntryLog.class).to(EntryLog.class);
                 bind(ItemStore.class).to(ItemStore.class);
                 bind(RecordIndex.class).to(RecordIndex.class);
+
+                bind(AssertRootHashCommandHandler.class).to(CommandHandler.class);
+                bind(AddItemCommandHandler.class).to(CommandHandler.class);
+                bind(AppendEntryCommandHandler.class).to(CommandHandler.class);
+                bind(CommandExecutorImpl.class).to(CommandExecutor.class);
+                bind(CommandParserImpl.class).to(CommandParser.class);
 
                 bind(RequestContext.class).to(RequestContext.class);
                 bind(ViewFactory.class).to(ViewFactory.class).in(Singleton.class);
