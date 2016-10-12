@@ -19,5 +19,11 @@ public interface CurrentKeysUpdateDAO {
 
     @SqlUpdate("update total_records set count=count+:noOfNewRecords")
     void updateTotalRecords(@Bind("noOfNewRecords") int noOfNewRecords);
+
+    @SqlUpdate("update total_records set count=:recordCount")
+    void setTotalRecords(@Bind("recordCount") int recordCount);
+
+    @SqlUpdate("truncate table current_keys")
+    void removeAllCurrentKeys();
 }
 

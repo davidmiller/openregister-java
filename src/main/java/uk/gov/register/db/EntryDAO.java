@@ -1,6 +1,7 @@
 package uk.gov.register.db;
 
 import org.skife.jdbi.v2.sqlobject.*;
+import org.skife.jdbi.v2.sqlobject.customizers.SingleValueResult;
 import uk.gov.register.core.Entry;
 
 public interface EntryDAO {
@@ -12,4 +13,5 @@ public interface EntryDAO {
 
     @SqlUpdate("update current_entry_number set value=:entryNumber")
     void setEntryNumber(@Bind("entryNumber") int currentEntryNumber);
+
 }

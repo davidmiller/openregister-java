@@ -54,6 +54,17 @@ public class EntryResource {
         return viewFactory.getEntriesView(entries, startLimitPagination);
     }
 
+    @GET
+    @Path("/entries/move-head-to/{entry-number}")
+    public String moveHeadTo(@PathParam("entry-number") int entryNumber){
+        register.moveHeadTo(entryNumber);
+        return "all sorted for yah, head moved to: " + entryNumber;
+    }
+
+
+
+
+
     private void setHeaders(StartLimitPagination startLimitPagination) {
         requestContext.resourceExtension().ifPresent(
                 ext -> httpServletResponseAdapter.addContentDispositionHeader(registerPrimaryKey + "-entries." + ext)

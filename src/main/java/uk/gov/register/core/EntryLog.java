@@ -34,11 +34,20 @@ public class EntryLog {
     public void appendEntries(Handle handle, List<Entry> entries) {
         EntryDAO entryDAO = handle.attach(EntryDAO.class);
         entryDAO.insertInBatch(entries);
-        entryDAO.setEntryNumber(entryDAO.currentEntryNumber() + entries.size());
+//        entryDAO.setEntryNumber(entryDAO.currentEntryNumber() + entries.size());
+    }
+
+    public void moveHeadTo(Handle handle, int entryNumber){
+        EntryDAO entryDAO = handle.attach(EntryDAO.class);
+        entryDAO.setEntryNumber(entryNumber);
     }
 
     public Optional<Entry> getEntry(Handle handle, int entryNumber) {
         return handle.attach(EntryQueryDAO.class).findByEntryNumber(entryNumber);
+    }
+
+    public Optional<Entry> getEntryBySha256(Handle handle, String sha256hex) {
+        return handle.attach(EntryQueryDAO.class).getEntryBySHA256(sha256hex);
     }
 
     public Collection<Entry> getEntries(Handle h, int start, int limit) {

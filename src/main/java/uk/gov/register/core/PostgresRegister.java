@@ -1,6 +1,7 @@
 package uk.gov.register.core;
 
 import com.google.common.collect.Lists;
+import org.apache.jena.atlas.lib.NotImplemented;
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.TransactionIsolationLevel;
 import uk.gov.register.configuration.RegisterNameConfiguration;
@@ -17,6 +18,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import static org.apache.jena.vocabulary.RSS.items;
 
 public class PostgresRegister implements Register {
     private final RecordIndex recordIndex;
@@ -35,7 +38,7 @@ public class PostgresRegister implements Register {
                             ItemStore itemStore,
                             DBI dbi) {
         this.recordIndex = recordIndex;
-        registerName = registerNameConfig.getRegister();
+        this.registerName = registerNameConfig.getRegister();
         this.entryLog = entryLog;
         this.itemStore = itemStore;
         this.dbi = dbi;
@@ -52,8 +55,34 @@ public class PostgresRegister implements Register {
                     .map(item -> new Record(new Entry(currentEntryNumber.incrementAndGet(), item.getSha256hex(), Instant.now()), item))
                     .collect(Collectors.toList());
             entryLog.appendEntries(handle, Lists.transform(records, r -> r.entry));
+            entryLog.moveHeadTo(handle, currentEntryNumber.get());
             recordIndex.updateRecordIndex(handle, registerName, records);
         });
+    }
+
+
+    @Override
+    public void moveHeadTo(int entryNumber) {
+        dbi.useTransaction(TransactionIsolationLevel.SERIALIZABLE, (handle, status) -> {
+            entryLog.moveHeadTo(handle, entryNumber);
+
+            Collection<Item> allItems = itemStore.getAllItems(handle);
+            List<Record> records = allItems.stream()
+                    .map(item -> {
+                        //                        omg the world is near the end I put .get() over here, FIXIT #yolo
+                        Entry itemEntry = entryLog.getEntryBySha256(handle, item.getSha256hex()).get();
+                        return new Record(itemEntry, item);
+                    })
+                    .collect(Collectors.toList());
+
+            recordIndex.recalculateRecordIndex(handle, registerName, records);
+
+        });
+    }
+
+    @Override
+    public void cleanRubbishWhichIsPastHead() {
+        throw new NotImplemented("not yet not yet");
     }
 
     @Override
@@ -195,4 +224,5 @@ public class PostgresRegister implements Register {
             stagedItems.clear();
         });
     }
+
 }

@@ -18,6 +18,17 @@ public class RecordIndex {
         currentKeysUpdateDAO.updateTotalRecords(currentKeys.size() - noOfRecordsDeleted);
     }
 
+    public void recalculateRecordIndex(Handle handle, String registerName, List<Record> records){
+        CurrentKeysUpdateDAO currentKeysUpdateDAO = handle.attach(CurrentKeysUpdateDAO.class);
+
+        List<CurrentKey> currentKeys = extractCurrentKeys(registerName, records);
+
+        currentKeysUpdateDAO.removeAllCurrentKeys();
+        currentKeysUpdateDAO.writeCurrentKeys(currentKeys);
+        currentKeysUpdateDAO.setTotalRecords(currentKeys.size());
+
+    }
+
     public Optional<Record> getRecord(Handle h, String key) {
         return h.attach(RecordQueryDAO.class).findByPrimaryKey(key);
     }

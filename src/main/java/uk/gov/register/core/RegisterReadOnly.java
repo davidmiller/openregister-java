@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface RegisterReadOnly {
+public interface RegisterReadOnly extends GitLikeBits {
     Optional<Item> getItemBySha256(String sha256hex);
     Collection<Item> getAllItems();
 
@@ -32,3 +32,4 @@ public interface RegisterReadOnly {
     EntryProof getEntryProof(int entryNumber, int totalEntries);
     ConsistencyProof getConsistencyProof(int totalEntries1, int totalEntries2);
 }
+
