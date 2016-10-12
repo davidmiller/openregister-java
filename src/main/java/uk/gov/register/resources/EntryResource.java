@@ -55,13 +55,18 @@ public class EntryResource {
     }
 
     @GET
-    @Path("/entries/move-head-to/{entry-number}")
+    @Path("/move-head-to/{entry-number}")
     public String moveHeadTo(@PathParam("entry-number") int entryNumber){
         register.moveHeadTo(entryNumber);
         return "all sorted for yah, head moved to: " + entryNumber;
     }
 
-
+    @GET
+    @Path("/clean-rubbish")
+    public String cleanRubbish(){
+        register.cleanRubbishWhichIsPastHead();
+        return "all sorted for yah, all the rubbish past the head cleaned";
+    }
 
 
 

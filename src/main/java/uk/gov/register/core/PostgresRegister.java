@@ -84,6 +84,7 @@ public class PostgresRegister implements Register {
     public void cleanRubbishWhichIsPastHead() {
         dbi.useTransaction(TransactionIsolationLevel.SERIALIZABLE, (handle, status) -> {
             itemStore.cleanRubbish(handle);
+            entryLog.cleanRubbish(handle);
         });
     }
 

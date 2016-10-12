@@ -42,6 +42,11 @@ public class EntryLog {
         entryDAO.setEntryNumber(entryNumber);
     }
 
+    public void cleanRubbish(Handle handle){
+        EntryDAO entryDAO = handle.attach(EntryDAO.class);
+        entryDAO.cleanRubbish();
+    }
+
     public Optional<Entry> getEntry(Handle handle, int entryNumber) {
         return handle.attach(EntryQueryDAO.class).findByEntryNumber(entryNumber);
     }

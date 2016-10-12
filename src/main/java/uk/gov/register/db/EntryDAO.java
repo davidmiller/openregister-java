@@ -14,4 +14,7 @@ public interface EntryDAO {
     @SqlUpdate("update current_entry_number set value=:entryNumber")
     void setEntryNumber(@Bind("entryNumber") int currentEntryNumber);
 
+    @SqlUpdate("delete from entry where entry_number > (select value from current_entry_number)")
+    void cleanRubbish();
+
 }
