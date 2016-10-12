@@ -7,4 +7,7 @@ import uk.gov.register.core.Item;
 public interface ItemDAO {
     @SqlBatch("insert into item(sha256hex, content) values(:sha256hex, :contentAsJsonb) on conflict do nothing")
     void insertInBatch(@BindBean Iterable<Item> items);
+
+    @SqlBatch()
+    void cleanRubbish();
 }

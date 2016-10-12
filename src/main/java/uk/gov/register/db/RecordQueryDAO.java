@@ -24,6 +24,10 @@ public abstract class RecordQueryDAO {
 
     private static final ObjectMapper objectMapper = Jackson.newObjectMapper();
 
+    //is used is used here as string
+    private static String CURRENT_HEAD_FILTER = " (entry_number <= (select value from current_entry_number)) ";
+
+
     @SqlQuery("SELECT count FROM total_records")
     public abstract int getTotalRecords();
 
@@ -36,7 +40,9 @@ public abstract class RecordQueryDAO {
     @RegisterMapper(RecordMapper.class)
     public abstract List<Record> getRecords(@Bind("limit") long limit, @Bind("offset") long offset);
 
-    @SqlQuery("select entry_number, timestamp, sha256hex from entry where sha256hex in (select sha256hex from item where (content @> :contentPGobject)) order by entry_number asc")
+
+    //here be changes to
+    @SqlQuery("select entry_number, timestamp, sha256hex from entry where sha256hex in (select sha256hex from item where (content @> :contentPGobject)) and (entry_number <= (select value from current_entry_number))  order by entry_number asc")
     @RegisterMapper(EntryMapper.class)
     public abstract Collection<Entry> __findAllEntriesOfRecordBy(@Bind("contentPGobject") PGobject content);
 

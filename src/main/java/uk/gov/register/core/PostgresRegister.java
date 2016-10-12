@@ -55,8 +55,8 @@ public class PostgresRegister implements Register {
                     .map(item -> new Record(new Entry(currentEntryNumber.incrementAndGet(), item.getSha256hex(), Instant.now()), item))
                     .collect(Collectors.toList());
             entryLog.appendEntries(handle, Lists.transform(records, r -> r.entry));
-            entryLog.moveHeadTo(handle, currentEntryNumber.get());
             recordIndex.updateRecordIndex(handle, registerName, records);
+            entryLog.moveHeadTo(handle, currentEntryNumber.get());
         });
     }
 
@@ -82,7 +82,9 @@ public class PostgresRegister implements Register {
 
     @Override
     public void cleanRubbishWhichIsPastHead() {
-        throw new NotImplemented("not yet not yet");
+        dbi.useTransaction(TransactionIsolationLevel.SERIALIZABLE, (handle, status) -> {
+            itemStore.cleanRubbish(handle);
+        });
     }
 
     @Override

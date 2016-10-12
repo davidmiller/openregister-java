@@ -19,4 +19,8 @@ public class ItemStore {
     public Collection<Item> getAllItems(Handle h) {
         return h.attach(ItemQueryDAO.class).getAllItemsNoPagination();
     }
+
+    public void cleanRubbish(Handle handle){
+        handle.attach(ItemDAO.class).cleanRubbish();
+    }
 }
