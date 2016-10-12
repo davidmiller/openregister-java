@@ -6,6 +6,8 @@ import uk.gov.register.db.ItemQueryDAO;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class ItemStore {
     public void putItems(Handle handle, Iterable<Item> items) {

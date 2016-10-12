@@ -19,6 +19,7 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
+import java.util.List;
 
 @Path("/")
 public class DataUpload {
@@ -30,17 +31,17 @@ public class DataUpload {
     private ItemValidator itemValidator;
     private Register register;
     private CommandParser commandParser;
-    private CommandExecutor commandExecutor;
+//    private CommandExecutor commandExecutor;
 
     @Inject
-    public DataUpload(ViewFactory viewFactory, RegisterNameConfiguration registerNameConfiguration, ObjectReconstructor objectReconstructor, ItemValidator itemValidator, Register register, CommandParser commandParser, CommandExecutor commandExecutor) {
+    public DataUpload(ViewFactory viewFactory, RegisterNameConfiguration registerNameConfiguration, ObjectReconstructor objectReconstructor, ItemValidator itemValidator, Register register, CommandParser commandParser) {
         this.viewFactory = viewFactory;
         this.objectReconstructor = objectReconstructor;
         this.itemValidator = itemValidator;
         this.register = register;
         this.registerPrimaryKey = registerNameConfiguration.getRegister();
         this.commandParser = commandParser;
-        this.commandExecutor = commandExecutor;
+//        this.commandExecutor = commandExecutor;
     }
 
     @Context
@@ -69,13 +70,8 @@ public class DataUpload {
                 throw new BadRequestException("Register serialization format has not been specified");
             }
 
-            Iterable<RegisterCommand> registerCommands = commandParser.parseCommands(payload);
-
-            registerCommands.forEach(registerCommand -> {
-                commandExecutor.execute(registerCommand);
-            });
-
-            register.getRegisterProof();
+            List<RegisterCommand> registerCommands = commandParser.parseCommands(payload);
+            register.loadSerializationFormatCommands(registerCommands);
         } catch (Throwable t) {
             logger.error(Throwables.getStackTraceAsString(t));
         }

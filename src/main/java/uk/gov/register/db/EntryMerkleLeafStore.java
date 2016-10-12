@@ -11,7 +11,6 @@ public class EntryMerkleLeafStore implements MerkleLeafStore {
     private final EntryQueryDAO entryDAO;
     private final EntryIteratorDAO entryIteratorDAO;
 
-
     public EntryMerkleLeafStore(EntryQueryDAO entryDAO) {
         this.entryDAO = entryDAO;
         this.entryIteratorDAO = new EntryIteratorDAO(entryDAO);

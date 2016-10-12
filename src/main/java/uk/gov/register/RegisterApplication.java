@@ -27,7 +27,6 @@ import uk.gov.register.core.*;
 import uk.gov.register.db.EntryQueryDAO;
 import uk.gov.register.db.RecordIndex;
 import uk.gov.register.db.SchemaCreator;
-import uk.gov.register.filters.UriDataFormatFilter;
 import uk.gov.register.monitoring.CloudWatchHeartbeater;
 import uk.gov.register.resources.RequestContext;
 import uk.gov.register.service.ItemConverter;
@@ -109,9 +108,10 @@ public class RegisterApplication extends Application<RegisterConfiguration> {
                 bind(ItemStore.class).to(ItemStore.class);
                 bind(RecordIndex.class).to(RecordIndex.class);
 
-                bind(AssertRootHashCommandHandler.class).to(CommandHandler.class);
-                bind(AddItemCommandHandler.class).to(CommandHandler.class);
+                bind(AddItemsCommandHandler.class).to(CommandHandler.class);
                 bind(AppendEntryCommandHandler.class).to(CommandHandler.class);
+                bind(AssertRootHashCommandHandler.class).to(CommandHandler.class);
+
                 bind(CommandExecutorImpl.class).to(CommandExecutor.class);
                 bind(CommandParserImpl.class).to(CommandParser.class);
 

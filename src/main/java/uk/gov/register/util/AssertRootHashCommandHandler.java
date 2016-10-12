@@ -1,5 +1,6 @@
 package uk.gov.register.util;
 
+import org.skife.jdbi.v2.Handle;
 import uk.gov.register.core.Register;
 import uk.gov.register.views.RegisterProof;
 
@@ -17,14 +18,15 @@ public class AssertRootHashCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void execute(RegisterCommand command) {
+    public boolean execute(Handle handle, Iterable<RegisterCommand> commands) {
         try {
+            // There's only one command here, so just get it
+            RegisterCommand command;
+
             String rootHash = commandHelper.getRootHash(command);
             RegisterProof proof = register.getRegisterProof();
 
-            if (proof.getRootHash() != rootHash) {
-                throw new RuntimeException("Could not assert root hash");
-            }
+            return proof.getRootHash() != rootHash;
         } catch(NoSuchAlgorithmException ex) {
             throw new RuntimeException(ex);
         }

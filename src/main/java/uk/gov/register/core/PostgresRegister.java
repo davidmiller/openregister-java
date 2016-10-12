@@ -1,11 +1,16 @@
 package uk.gov.register.core;
 
 import com.google.common.collect.Lists;
+import org.glassfish.hk2.api.IterableProvider;
 import org.skife.jdbi.v2.DBI;
+import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.TransactionIsolationLevel;
+import org.skife.jdbi.v2.exceptions.UnableToCloseResourceException;
 import uk.gov.register.configuration.RegisterNameConfiguration;
 import uk.gov.register.db.RecordIndex;
 import uk.gov.register.exceptions.ItemMissingFromRegisterException;
+import uk.gov.register.util.CommandHandler;
+import uk.gov.register.util.RegisterCommand;
 import uk.gov.register.views.ConsistencyProof;
 import uk.gov.register.views.EntryProof;
 import uk.gov.register.views.RegisterProof;
@@ -16,6 +21,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class PostgresRegister implements Register {
@@ -27,13 +33,17 @@ public class PostgresRegister implements Register {
     private final DBI dbi;
     private final List<Entry> stagedEntries;
     private final Set<Item> stagedItems;
+    private Map<String, CommandHandler> commandHandlerLookup;
+    private Handle registerHandle;
+    private final IterableProvider<CommandHandler> commandHandlers;
 
     @Inject
     public PostgresRegister(RegisterNameConfiguration registerNameConfig,
                             RecordIndex recordIndex,
                             EntryLog entryLog,
                             ItemStore itemStore,
-                            DBI dbi) {
+                            DBI dbi,
+                            IterableProvider<CommandHandler> commandHandlers) {
         this.recordIndex = recordIndex;
         registerName = registerNameConfig.getRegister();
         this.entryLog = entryLog;
@@ -41,6 +51,45 @@ public class PostgresRegister implements Register {
         this.dbi = dbi;
         this.stagedEntries = new ArrayList<>();
         this.stagedItems = new HashSet<>();
+        this.commandHandlers = commandHandlers;
+
+        Stream<CommandHandler> stream = StreamSupport.stream(commandHandlers.spliterator(), false);
+        this.commandHandlerLookup = stream.collect(Collectors.toMap(CommandHandler::getCommandName, h -> h));
+
+    }
+
+    @Override
+    public void loadSerializationFormatCommands(List<RegisterCommand> registerCommands) {
+        if (registerCommands == null || registerCommands.isEmpty()) {
+            return;
+        }
+
+        Map<String, List<RegisterCommand>> commands = registerCommands.stream()
+            .collect(Collectors.groupingBy(
+                RegisterCommand::getCommandName,
+                Collectors.mapping(r -> r, Collectors.toList())));
+
+        Handle handle = startTransaction(this.registerHandle);
+
+        try {
+            commandHandlers.forEach(handler -> {
+                List<RegisterCommand> handlerCommands = commands.get(handler.getCommandName());
+
+                if (!handlerCommands.isEmpty()) {
+                    boolean result = handler.execute(handle, handlerCommands);
+
+                    if (!result) {
+                        handle.rollback();
+                        throw new RuntimeException("Command failed, rolling back.");
+                    }
+                }
+            });
+
+            handle.commit();
+        }
+        finally {
+            handle.close();
+        }
     }
 
     @Override
@@ -139,9 +188,11 @@ public class PostgresRegister implements Register {
 
     @Override
     public RegisterProof getRegisterProof() throws NoSuchAlgorithmException {
-        mintStagedData();
+        Handle handle = startTransaction(this.registerHandle);
 
-        return dbi.inTransaction((handle, status) -> entryLog.getRegisterProof(handle));
+//        mintStagedData(handle);
+
+        return entryLog.getRegisterProof(handle);
     }
 
     @Override
@@ -156,43 +207,60 @@ public class PostgresRegister implements Register {
                 entryLog.getConsistencyProof(handle, totalEntries1, totalEntries2));
     }
 
-    private void mintStagedData() {
-        dbi.useTransaction(TransactionIsolationLevel.SERIALIZABLE, (handle, status) -> {
-            if (stagedItems.isEmpty() && stagedEntries.isEmpty()) {
-                return;
+    private Handle startTransaction(Handle handle) {
+        try {
+            if (handle == null) {
+                handle = dbi.open();
+                handle.setTransactionIsolation(TransactionIsolationLevel.SERIALIZABLE);
             }
 
-            itemStore.putItems(handle, stagedItems);
+            if (handle.isInTransaction()) {
+                handle.close();
+            }
 
-            // item-hash to item
-            Map<String, Item> itemsByHash = stagedItems.stream()
-                    .collect(Collectors.toMap(Item::getSha256hex, i -> i));
+            handle.begin();
 
-            List<Record> records = stagedEntries.stream()
-                    .map(entry -> {
-                        String hash = entry.getSha256hex();
-                        Item item;
+            return handle;
+        } catch (UnableToCloseResourceException ex) {
+            return null;
+        }
+    }
 
-                        if (itemsByHash.containsKey(hash)) {
-                            item = itemsByHash.get(hash);
-                        } else {
-                            try {
-                                item = itemStore.getItemBySha256(handle, hash).get();
-                            } catch (NoSuchElementException ex) {
-                                throw new ItemMissingFromRegisterException(hash);
-                            }
+    private void mintStagedData(Handle handle) {
+        if (stagedItems.isEmpty() && stagedEntries.isEmpty()) {
+            return;
+        }
+
+        itemStore.putItems(handle, stagedItems);
+
+        // item-hash to item
+        Map<String, Item> itemsByHash = stagedItems.stream()
+                .collect(Collectors.toMap(Item::getSha256hex, i -> i));
+
+        List<Record> records = stagedEntries.stream()
+                .map(entry -> {
+                    String hash = entry.getSha256hex();
+                    Item item;
+
+                    if (itemsByHash.containsKey(hash)) {
+                        item = itemsByHash.get(hash);
+                    } else {
+                        try {
+                            item = itemStore.getItemBySha256(handle, hash).get();
+                        } catch (NoSuchElementException ex) {
+                            throw new ItemMissingFromRegisterException(hash);
                         }
+                    }
 
-                        return new Record(entry, item);
-                    })
-                    .collect(Collectors.toList());
+                    return new Record(entry, item);
+                })
+                .collect(Collectors.toList());
 
-            entryLog.appendEntries(handle, Lists.transform(records, r -> r.entry));
-            recordIndex.updateRecordIndex(handle, registerName, records);
+        entryLog.appendEntries(handle, Lists.transform(records, r -> r.entry));
+        recordIndex.updateRecordIndex(handle, registerName, records);
 
-            // Flush the staging data
-            stagedEntries.clear();
-            stagedItems.clear();
-        });
+        // Flush the staging data
+        stagedEntries.clear();
+        stagedItems.clear();
     }
 }

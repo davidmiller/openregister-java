@@ -6,7 +6,7 @@ import java.util.List;
 
 public class CommandParserImpl implements CommandParser {
     @Override
-    public Iterable<RegisterCommand> parseCommands(String commandStr) {
+    public List<RegisterCommand> parseCommands(String commandStr) {
         List<RegisterCommand> registerCommands = new ArrayList<>();
         String[] commands = commandStr.split("\n");
 

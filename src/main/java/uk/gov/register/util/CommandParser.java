@@ -1,5 +1,7 @@
 package uk.gov.register.util;
 
+import java.util.List;
+
 public interface CommandParser {
-    Iterable<RegisterCommand> parseCommands(String commandStr);
+    List<RegisterCommand> parseCommands(String commandStr);
 }
