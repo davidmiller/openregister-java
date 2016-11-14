@@ -2,6 +2,7 @@ package uk.gov.register.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.dropwizard.jackson.Jackson;
+import org.junit.Before;
 import org.junit.Test;
 import uk.gov.register.RegisterConfiguration;
 import uk.gov.register.configuration.FieldsConfiguration;
@@ -26,13 +27,17 @@ public class ItemConverterFunctionalTest {
     private FieldsConfiguration fieldsConfiguration;
     private RequestContext requestContext;
     private RegisterDomainConfiguration registerDomainConfiguration;
+    private ItemConverter itemConverter;
 
-    //@Before
+    @Before
     public void setup() {
-        fieldsConfiguration = mock(FieldsConfiguration.class);
-        requestContext = mock(RequestContext.class);
-        when(requestContext.getScheme()).thenReturn("http");
-        registerDomainConfiguration = mock(RegisterDomainConfiguration.class);
+        fieldsConfiguration = new FieldsConfiguration(Optional.ofNullable(System.getProperty("fieldsYaml")));
+        requestContext = new RequestContext() {
+            @Override
+            public String getScheme() { return "http"; }
+        };
+        registerDomainConfiguration = new RegisterConfiguration();
+        itemConverter = new ItemConverter(fieldsConfiguration, requestContext, registerDomainConfiguration);
     }
 
     @Test
@@ -43,11 +48,6 @@ public class ItemConverterFunctionalTest {
         when(entry.getKey()).thenReturn("citizen-names");
         when(entry.getValue()).thenReturn(jsonNode);
 
-        fieldsConfiguration = new FieldsConfiguration(Optional.ofNullable(System.getProperty("fieldsYaml")));
-        requestContext = new RequestContext();
-        registerDomainConfiguration = new RegisterConfiguration();
-
-        ItemConverter itemConverter = new ItemConverter(fieldsConfiguration, requestContext, registerDomainConfiguration);
         FieldValue result = itemConverter.convert(entry);
 
         assertThat(result, instanceOf(StringValue.class));
@@ -62,11 +62,6 @@ public class ItemConverterFunctionalTest {
         when(entry.getKey()).thenReturn("parent-bodies");
         when(entry.getValue()).thenReturn(res);
 
-        fieldsConfiguration = new FieldsConfiguration(Optional.ofNullable(System.getProperty("fieldsYaml")));
-        requestContext = new RequestContext();
-        registerDomainConfiguration = new RegisterConfiguration();
-
-        ItemConverter itemConverter = new ItemConverter(fieldsConfiguration, requestContext, registerDomainConfiguration);
         FieldValue result = itemConverter.convert(entry);
 
         assertThat(result, instanceOf(ListValue.class));
@@ -80,14 +75,6 @@ public class ItemConverterFunctionalTest {
         when(entry.getKey()).thenReturn("school");
         when(entry.getValue()).thenReturn(jsonNode);
 
-        fieldsConfiguration = new FieldsConfiguration(Optional.ofNullable(System.getProperty("fieldsYaml")));
-        requestContext = new RequestContext() {
-            @Override
-            public String getScheme() { return "http"; }
-        };
-        registerDomainConfiguration = new RegisterConfiguration();
-
-        ItemConverter itemConverter = new ItemConverter(fieldsConfiguration, requestContext, registerDomainConfiguration);
         FieldValue result = itemConverter.convert(entry);
 
         assertThat(result, instanceOf(LinkValue.class));
@@ -102,14 +89,6 @@ public class ItemConverterFunctionalTest {
         when(entry.getKey()).thenReturn("business");
         when(entry.getValue()).thenReturn(jsonNode);
 
-        fieldsConfiguration = new FieldsConfiguration(Optional.ofNullable(System.getProperty("fieldsYaml")));
-        requestContext = new RequestContext() {
-            @Override
-            public String getScheme() { return "http"; }
-        };
-        registerDomainConfiguration = new RegisterConfiguration();
-
-        ItemConverter itemConverter = new ItemConverter(fieldsConfiguration, requestContext, registerDomainConfiguration);
         FieldValue result = itemConverter.convert(entry);
 
         assertThat(result, instanceOf(LinkValue.CurieValue.class));
